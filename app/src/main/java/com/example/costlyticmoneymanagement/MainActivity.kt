@@ -16,10 +16,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.costlyticmoneymanagement.ui.theme.CostlyticMoneyManagementTheme
 import com.example.costlyticmoneymanagement.view.navigation.Screen
+import com.example.costlyticmoneymanagement.view.screen.ForgetPasswordScreen
 import com.example.costlyticmoneymanagement.view.screen.LoginScreen
 import com.example.costlyticmoneymanagement.view.screen.NavigationScreen
 import com.example.costlyticmoneymanagement.view.screen.SignUpScreen
-import com.example.costlyticmoneymanagement.view.screen.SplashScreen
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -31,19 +31,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             NavHost(
                 navController = navController,
-                startDestination = Screen.Splash.route
+                startDestination = Screen.Navigation.route
             ) {
-                composable(Screen.Splash.route) {
-                    SplashScreen(
-                        onNavigateNext = {
-                            navController.navigate(Screen.Navigation.route) {
-                                popUpTo(Screen.Splash.route) { inclusive = true }
-                            }
-                        }
-                    )
-                }
-
-                // 2. Navigation / Onboarding Screen (Placeholder until you share NavigationActivity)
                 composable(Screen.Navigation.route) {
                     NavigationScreen(
                         onNavigateToSignUp = {
@@ -95,14 +84,16 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // 3. Forget Password Screen (Placeholder until you share it)
-                composable(Screen.ForgetPassword.route) {
-                    // ForgetPasswordScreen(navController = navController)
-                }
-
                 // 4. Dashboard Screen (Placeholder until you share it)
                 composable(Screen.Dashboard.route) {
                     // DashboardScreen(navController = navController)
+                }
+                composable(Screen.ForgetPassword.route) {
+                    ForgetPasswordScreen(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
 //            CostlyticMoneyManagementTheme {
