@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "671688741725",
+    "project_id": "costlytic-4d89d",
+    "storage_bucket": "costlytic-4d89d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671688741725:android:e9fcc3aecaf3bdef334eb4",
+        "android_client_info": {
+          "package_name": "com.example.Costlytic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnll0xQdPbqn-rP5M-GeWiBlb1prQqiRw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671688741725:android:685e692ee11b6d72334eb4",
+        "android_client_info": {
+          "package_name": "com.example.costlyticmoneymanagement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnll0xQdPbqn-rP5M-GeWiBlb1prQqiRw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
