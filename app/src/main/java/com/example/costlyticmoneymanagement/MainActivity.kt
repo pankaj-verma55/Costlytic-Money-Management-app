@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.costlyticmoneymanagement.ui.theme.CostlyticMoneyManagementTheme
 import com.example.costlyticmoneymanagement.view.navigation.Screen
+import com.example.costlyticmoneymanagement.view.screen.DashboardScreen
 import com.example.costlyticmoneymanagement.view.screen.ForgetPasswordScreen
 import com.example.costlyticmoneymanagement.view.screen.LoginScreen
 import com.example.costlyticmoneymanagement.view.screen.NavigationScreen
@@ -84,10 +85,17 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                // 4. Dashboard Screen (Placeholder until you share it)
                 composable(Screen.Dashboard.route) {
-                    // DashboardScreen(navController = navController)
+                    DashboardScreen(
+                        onNotificationClick = {
+                            navController.navigate(Screen.Notification.route)
+                        },
+                        onNavigateToMoney = { typeKey, typeValue ->
+                            navController.navigate(Screen.Money.createRoute(typeKey, typeValue))
+                        }
+                    )
                 }
+
                 composable(Screen.ForgetPassword.route) {
                     ForgetPasswordScreen(
                         onBackClick = {
