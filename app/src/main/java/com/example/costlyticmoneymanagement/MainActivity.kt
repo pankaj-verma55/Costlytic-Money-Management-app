@@ -17,7 +17,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.costlyticmoneymanagement.ui.theme.CostlyticMoneyManagementTheme
 import com.example.costlyticmoneymanagement.view.navigation.Screen
 import com.example.costlyticmoneymanagement.view.screen.LoginScreen
+import com.example.costlyticmoneymanagement.view.screen.NavigationScreen
 import com.example.costlyticmoneymanagement.view.screen.SignUpScreen
+import com.example.costlyticmoneymanagement.view.screen.SplashScreen
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -29,16 +31,41 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             NavHost(
                 navController = navController,
-                startDestination = Screen.Login.route
+                startDestination = Screen.Splash.route
             ) {
+                composable(Screen.Splash.route) {
+                    SplashScreen(
+                        onNavigateNext = {
+                            navController.navigate(Screen.Navigation.route) {
+                                popUpTo(Screen.Splash.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                // 2. Navigation / Onboarding Screen (Placeholder until you share NavigationActivity)
+                composable(Screen.Navigation.route) {
+                    NavigationScreen(
+                        onNavigateToSignUp = {
+                            navController.navigate(Screen.SignUp.route)
+                        },
+                        onNavigateToLogin = {
+                            navController.navigate(Screen.Login.route)
+                        },
+                        onAutoLoginToDashboard = {
+                            // Replaces FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK + finish()
+                            navController.navigate(Screen.Dashboard.route) {
+                                popUpTo(Screen.Navigation.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
                 composable(Screen.Login.route) {
                     LoginScreen(
                         onBackClick = {
                             navController.popBackStack()
                         },
                         onLoginSuccess = {
-                            // Navigate to Dashboard and remove Login from backstack
-                            // so pressing Back on Dashboard doesn't return to Login
                             navController.navigate(Screen.Dashboard.route) {
                                 popUpTo(Screen.Login.route) { inclusive = true }
                             }
