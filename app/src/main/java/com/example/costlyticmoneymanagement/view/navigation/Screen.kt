@@ -13,4 +13,6 @@ sealed class Screen(val route: String) {
     object Money : Screen("money/{typeKey}/{typeValue}") {
         fun createRoute(typeKey: String, typeValue: String) = "money/$typeKey/$typeValue"
     }
+
+    object Transaction : Screen("transaction")
 }

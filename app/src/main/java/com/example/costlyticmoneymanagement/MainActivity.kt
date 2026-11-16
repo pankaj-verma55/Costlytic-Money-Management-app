@@ -19,8 +19,11 @@ import com.example.costlyticmoneymanagement.view.navigation.Screen
 import com.example.costlyticmoneymanagement.view.screen.DashboardScreen
 import com.example.costlyticmoneymanagement.view.screen.ForgetPasswordScreen
 import com.example.costlyticmoneymanagement.view.screen.LoginScreen
+import com.example.costlyticmoneymanagement.view.screen.MoneyScreen
 import com.example.costlyticmoneymanagement.view.screen.NavigationScreen
+import com.example.costlyticmoneymanagement.view.screen.NotificationScreen
 import com.example.costlyticmoneymanagement.view.screen.SignUpScreen
+import com.example.costlyticmoneymanagement.view.screen.TransactionScreen
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -103,15 +106,43 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+                composable(Screen.Money.route) { backStackEntry ->
+                    val typeKey = backStackEntry.arguments?.getString("typeKey") ?: ""
+                    val typeValue = backStackEntry.arguments?.getString("typeValue") ?: ""
+
+                    MoneyScreen(
+                        typeKey = typeKey,
+                        typeValue = typeValue,
+                        onBackToDashboard = {
+                            navController.navigate(Screen.Dashboard.route) {
+                                popUpTo(Screen.Dashboard.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+                composable(Screen.Notification.route) {
+                    NotificationScreen(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+                composable(Screen.Transaction.route) {
+                    TransactionScreen(
+                        onBackToDashboard = {
+                            navController.navigate(Screen.Dashboard.route) {
+                                popUpTo(Screen.Dashboard.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+
+
+
+
+
             }
-//            CostlyticMoneyManagementTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
-//            }
         }
     }
 }
