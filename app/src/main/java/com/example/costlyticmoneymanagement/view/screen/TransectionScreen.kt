@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
 @Composable
-fun TransactionScreen(
+fun TransferScreen(
     onBackToDashboard: () -> Unit,
     onContinueClick: (amount: String, category: String, description: String) -> Unit = { _, _, _ -> }
 ) {

@@ -39,7 +39,10 @@ import com.example.costlyticmoneymanagement.view.uicomponent.LineChartView
 @Composable
 fun DashboardScreen(
     onNotificationClick: () -> Unit,
-    onNavigateToMoney: (typeKey: String, typeValue: String) -> Unit
+    onNavigateToMoney: (typeKey: String, typeValue: String) -> Unit,
+    onNavigateToDetail: (key: String, value: String) -> Unit = { _, _ -> },
+    onLogoutSuccess: () -> Unit = {},
+    onNavigateToFinancialReport: () -> Unit = {}
 ) {
     // 0 = Home, 1 = Transaction, 2 = Center '+' (Transfer), 3 = Budget, 4 = Profile
     var selectedBottomTab by remember { mutableIntStateOf(0) }
@@ -90,7 +93,7 @@ fun DashboardScreen(
 
                 1 -> {
                     TransactionScreen(
-                        onBackToDashboard = { selectedBottomTab = 0 }
+                        onNavigateToFinancialReport = onNavigateToFinancialReport
                     )
                 }
 
@@ -124,18 +127,21 @@ fun DashboardScreen(
                 }
 
                 4 -> {
-                    // 5. PROFILE TAB (Drop your ProfileScreen() here once created)
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Profile Screen",
-                            fontFamily = manropeBold,
-                            fontSize = 18.sp,
-                            color = grayText
-                        )
-                    }
+                    ProfileScreen(
+                        onNavigateToDetail = onNavigateToDetail,
+                        onLogoutSuccess = onLogoutSuccess
+                    )
+//                    Box(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Text(
+//                            text = "Profile Screen",
+//                            fontFamily = manropeBold,
+//                            fontSize = 18.sp,
+//                            color = grayText
+//                        )
+//                    }
                 }
             }
         }

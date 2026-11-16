@@ -22,4 +22,8 @@
     <color name="light_white">#FCFCFC</color>
     <color name="dark_Black">#292B2D</color>
     <color name="skyBlueDark">#0077FF</color>
+    <color name="grayTransparent">#A0A0A0</color>
+    <color name="partialBlack">#0D0E0F</color>
+    <color name="red_light">#FFE2E4</color>
+    <color name="light_gray1">#F6F6F6</color>
 </resources>
