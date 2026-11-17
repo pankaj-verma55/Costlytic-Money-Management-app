@@ -58,6 +58,7 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    val auth = FirebaseAuth.getInstance()
 
     // Error States
     var emailError by remember { mutableStateOf<String?>(null) }
@@ -74,35 +75,55 @@ fun LoginScreen(
         return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches()
     }
 
-    fun loginUser(emailInput: String, passInput: String) {
-        val auth = FirebaseAuth.getInstance()
+    fun loginUser(emailInput: String,
+                  passInput: String,
+                  onEmailError: (String) -> Unit,
+                  onPasswordError: (String) -> Unit) {
 
         auth.signInWithEmailAndPassword(emailInput, passInput)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
-                    onLoginSuccess() // Navigates via NavController instead of Intent
-                } else {
-                    val exception = task.exception
-                    when (exception) {
-                        is FirebaseAuthInvalidUserException,
-                        is FirebaseAuthInvalidCredentialsException -> {
-                            Toast.makeText(
-                                context,
-                                "Invalid email or password. Please try again.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                        else -> {
-                            Toast.makeText(
-                                context,
-                                "Network error: ${exception?.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
+            .addOnSuccessListener {
+                Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
+                onLoginSuccess()
+            }
+            .addOnFailureListener { exception ->
+                when (exception) {
+                    is FirebaseAuthInvalidUserException -> {
+                        onEmailError("Email is not registered")
+                    }
+
+                    is FirebaseAuthInvalidCredentialsException -> {
+                        onPasswordError("Incorrect password")
+                    }
+                    else -> {
+                        onPasswordError(exception.localizedMessage ?: "Authentication failed")
                     }
                 }
             }
+//            .addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
+//                    onLoginSuccess()
+//                } else {
+//                    val exception = task.exception
+//                    when (exception) {
+//                        is FirebaseAuthInvalidUserException,
+//                        is FirebaseAuthInvalidCredentialsException -> {
+//                            Toast.makeText(
+//                                context,
+//                                "Invalid email or password. Please try again.",
+//                                Toast.LENGTH_LONG
+//                            ).show()
+//                        }
+//                        else -> {
+//                            Toast.makeText(
+//                                context,
+//                                "Network error: ${exception?.message}",
+//                                Toast.LENGTH_LONG
+//                            ).show()
+//                        }
+//                    }
+//                }
+//            }
     }
 
     Column(
@@ -266,16 +287,23 @@ fun LoginScreen(
         // Login Button
         Button(
             onClick = {
-                if (email.isEmpty()) {
+                emailError = null
+                passwordError = null
+                val trimmedEmail = email.trim()
+
+                if (trimmedEmail.isEmpty()) {
                     emailError = "Email is required"
-                } else if (!isValidEmail(email.trim())) {
+                } else if (!isValidEmail(trimmedEmail.trim())) {
                     emailError = "InValid email address"
                 } else if (password.isEmpty()) {
                     passwordError = "Password is required"
                 } else if (password.length < 8 || password.length > 16) {
                     passwordError = "Password must be at least 8 to 16 characters long"
                 } else {
-                    loginUser(email, password)
+                    loginUser(emailInput = trimmedEmail,
+                        passInput = password,
+                        onEmailError = { msg -> emailError = msg },
+                        onPasswordError = { msg -> passwordError = msg })
                 }
             },
             colors = ButtonDefaults.buttonColors(
