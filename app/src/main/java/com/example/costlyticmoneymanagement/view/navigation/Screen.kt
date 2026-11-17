@@ -2,6 +2,7 @@ package com.example.costlyticmoneymanagement.view.navigation
 
 sealed class Screen(val route: String) {
     object Navigation : Screen("navigation")
+    object Splash : Screen("SplashScreen")
     object Login : Screen("login")
     object SignUp : Screen("signup")
     object ForgetPassword : Screen("forget_password")

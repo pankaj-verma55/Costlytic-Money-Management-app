@@ -39,15 +39,15 @@ private data class OnboardingPage(
 fun NavigationScreen(
     onNavigateToSignUp: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onAutoLoginToDashboard: () -> Unit
+//    onAutoLoginToDashboard: () -> Unit
 ) {
-    // Replaces onStart() Firebase currentUser check
-    LaunchedEffect(Unit) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            onAutoLoginToDashboard()
-        }
-    }
+//    // Replaces onStart() Firebase currentUser check
+//    LaunchedEffect(Unit) {
+//        val currentUser = FirebaseAuth.getInstance().currentUser
+//        if (currentUser != null) {
+//            onAutoLoginToDashboard()
+//        }
+//    }
 
     val interBold = FontFamily(Font(R.font.inter_bold))
 

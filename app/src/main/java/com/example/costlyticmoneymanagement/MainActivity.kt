@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
@@ -25,6 +26,7 @@ import com.example.costlyticmoneymanagement.view.screen.ProfileDetailItemScreen
 import com.example.costlyticmoneymanagement.view.screen.SignUpScreen
 import com.example.costlyticmoneymanagement.view.screen.TransferScreen
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,9 +35,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
+            val startDestination = remember {
+                if (FirebaseAuth.getInstance().currentUser != null) {
+                    Screen.Dashboard.route
+                } else {
+                    Screen.Navigation.route
+                }
+            }
             NavHost(
                 navController = navController,
-                startDestination = Screen.Navigation.route
+                startDestination = startDestination
             ) {
                 composable(Screen.Navigation.route) {
                     NavigationScreen(
@@ -44,13 +53,13 @@ class MainActivity : ComponentActivity() {
                         },
                         onNavigateToLogin = {
                             navController.navigate(Screen.Login.route)
-                        },
-                        onAutoLoginToDashboard = {
-                            // Replaces FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK + finish()
-                            navController.navigate(Screen.Dashboard.route) {
-                                popUpTo(Screen.Navigation.route) { inclusive = true }
-                            }
                         }
+//                        onAutoLoginToDashboard = {
+//                            // Replaces FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK + finish()
+//                            navController.navigate(Screen.Dashboard.route) {
+//                                popUpTo(Screen.Navigation.route) { inclusive = true }
+//                            }
+//                        }
                     )
                 }
                 composable(Screen.Login.route) {
