@@ -42,6 +42,7 @@ fun DashboardScreen(
     onNavigateToMoney: (typeKey: String, typeValue: String) -> Unit,
     onNavigateToDetail: (key: String, value: String) -> Unit = { _, _ -> },
     onLogoutSuccess: () -> Unit = {},
+    onNavigateToCreateBudget: () -> Unit = {},
     onNavigateToFinancialReport: () -> Unit = {}
 ) {
     // 0 = Home, 1 = Transaction, 2 = Center '+' (Transfer), 3 = Budget, 4 = Profile
@@ -113,17 +114,10 @@ fun DashboardScreen(
 
                 3 -> {
                     // 4. BUDGET TAB (Drop your BudgetScreen() here once created)
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Budget Screen",
-                            fontFamily = manropeBold,
-                            fontSize = 18.sp,
-                            color = grayText
-                        )
-                    }
+
+                    BudgetScreen(
+                        onNavigateToCreateBudget = onNavigateToCreateBudget
+                    )
                 }
 
                 4 -> {

@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.costlyticmoneymanagement.ui.theme.CostlyticMoneyManagementTheme
 import com.example.costlyticmoneymanagement.view.navigation.Screen
+import com.example.costlyticmoneymanagement.view.screen.CreateBudgetScreen
 import com.example.costlyticmoneymanagement.view.screen.DashboardScreen
 import com.example.costlyticmoneymanagement.view.screen.FinancialDetailReportScreen
 import com.example.costlyticmoneymanagement.view.screen.FinancialReportScreen
@@ -104,6 +105,38 @@ class MainActivity : ComponentActivity() {
                         },
                         onNavigateToMoney = { typeKey, typeValue ->
                             navController.navigate(Screen.Money.createRoute(typeKey, typeValue))
+                        }
+                    )
+                }
+
+                composable(Screen.Dashboard.route) {
+                    DashboardScreen(
+                        onNotificationClick = { navController.navigate(Screen.Notification.route) },
+                        onNavigateToMoney = { typeKey, typeValue ->
+                            navController.navigate(Screen.Money.createRoute(typeKey, typeValue))
+                        },
+                        onNavigateToDetail = { key, value ->
+                            navController.navigate(Screen.DetailTransaction.createRoute(key, value))
+                        },
+                        onNavigateToFinancialReport = {
+                            navController.navigate(Screen.FinancialReport.route)
+                        },
+                        onNavigateToCreateBudget = {
+                            navController.navigate(Screen.CreateBudget.route)
+                        },
+                        onLogoutSuccess = {
+                            FirebaseAuth.getInstance().signOut()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable(Screen.CreateBudget.route) {
+                    CreateBudgetScreen(
+                        onBackClick = {
+                            navController.popBackStack()
                         }
                     )
                 }

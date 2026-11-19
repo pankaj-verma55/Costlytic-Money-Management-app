@@ -97,31 +97,6 @@ fun LoginScreen(
                     }
                 }
             }
-//            .addOnCompleteListener { task ->
-//                if (task.isSuccessful) {
-//                    Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
-//                    onLoginSuccess()
-//                } else {
-//                    val exception = task.exception
-//                    when (exception) {
-//                        is FirebaseAuthInvalidUserException,
-//                        is FirebaseAuthInvalidCredentialsException -> {
-//                            Toast.makeText(
-//                                context,
-//                                "Invalid email or password. Please try again.",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        }
-//                        else -> {
-//                            Toast.makeText(
-//                                context,
-//                                "Network error: ${exception?.message}",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        }
-//                    }
-//                }
-//            }
     }
 
     Column(

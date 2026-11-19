@@ -10,6 +10,8 @@ sealed class Screen(val route: String) {
         fun createRoute(otp: String) = "verification/$otp"
     }
     object Dashboard : Screen("dashboard")
+
+    object CreateBudget : Screen("create_budget")
     object Notification : Screen("notification")
     object Money : Screen("money/{typeKey}/{typeValue}") {
         fun createRoute(typeKey: String, typeValue: String) = "money/$typeKey/$typeValue"
