@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#131E2E</color>
+<!--    <color name="black_color">#FFFFFF</color>-->
+<!--    <color name="black_font">#FFFFFF</color>-->
+<!--    <color name="white">#fff</color>-->
+<!--    <color name="white_nav">#4AFFFFFF</color>-->
+<!--    <color name="app_background">#A3A3A3</color>-->
+<!--    <color name="app_background_card">#A3A3A3</color>-->
+<!--    <color name="divider_color">#D2D2D2</color>-->
+<!--    <color name="primary_textcolor">#FFFFFF</color>-->
+<!--    <color name="color_grey_light">#232830</color>-->
+<!--    <color name="color_grey_light_2">#131E2E</color>-->
+<!--    <color name="color_grey">#D2D2D2</color>-->
+<!--    <color name="primary_textcolor2">#FFFFFF</color>-->
+<!--    <color name="primary_textcolor3">#D2D2D2</color>-->
+<!--    <color name="primary_textcolor4">#EA4750</color>-->
+<!--    <color name="primary_textcolor7">#FFFFFF</color>-->
+<!--    <color name="transparent">#10000000</color>-->
+<!--    <color name="primary_textcolor5">#717171</color>-->
+<!--    <color name="primary_textcolor6">#93959D</color>-->
+<!--    <color name="text_hint">#9c9c9c</color>-->
+<!--    <color name="approved_color">#008C00</color>-->
+<!--    <color name="approved_color_1">#2FB665</color>-->
+<!--    <color name="approved_bg_color">#E3FFEB</color>-->
+<!--    <color name="approved_bg_sub_color">#abdbe3</color>-->
+<!--    <color name="open_color">#FF6813</color>-->
+<!--    <color name="primary_light_black">#D2D2D2</color>-->
+<!--    <color name="open_bg_color">#FFFCE3</color>-->
+<!--    <color name="rejected_bg_color">#FFD4D7</color>-->
+<!--    <color name="rejected_color">#FF0606</color>-->
+<!--    <color name="procced_bg_color">#E5E8FF</color>-->
+<!--    <color name="proceced_color">#0426DA</color>-->
+<!--    <color name="app_color">#EA4750</color>-->
+<!--    <color name="border_color">#fcfcfc</color>-->
+<!--    <color name="card_color">#081321</color>-->
+<!--    <color name="error_color">#FF9B9B</color>-->
+<!--    <color name="gredient_color1">#EA4750</color>-->
+<!--    <color name="red_or_white">#FFFFFF</color>-->
+<!--    <color name="gredient_color2">#AC393D</color>-->
+<!--    <color name="gredient_color_icon_1">#FFF</color>-->
+<!--    <color name="gredient_color_icon_2">#FFF</color>-->
+<!--    <color name="date_background">#F8F8F8</color>-->
+<!--    <color name="intro_first_title">#fff</color>-->
+<!--    <color name="intro_second_title">#fff</color>-->
+<!--    <color name="intro_third_title">#fff</color>-->
+<!--    &lt;!&ndash;    for dark theme color&ndash;&gt;-->
+<!--    <color name="color_primary">#FFFFFF</color>-->
+<!--    <color name="card_background">#131E2E</color>-->
+<!--    <color name="card_background_dim">#80131E2E</color>-->
+<!--    <color name="moisture_baground">#494949</color>-->
+<!--    <color name="card_selected">#58626d</color>-->
+<!--    <color name="card_selected_2">#58626d</color>-->
+<!--    <color name="color_primary_3">#131E2E</color>-->
+<!--    <color name="color_primary_1">#1A1E24</color>-->
+<!--    <color name="color_primary_2">#232830</color>-->
+<!--    <color name="border_color2">#D2D2D2</color>-->
+<!--    <color name="image_bg">#FFFFFF</color>-->
+<!--    <color name="image_bg1">#FFF</color>-->
+<!--    <color name="light_devider">#E5E5E5</color>-->
+<!--    <color name="pricePink">#FFF8BBD0</color>-->
+<!--    <color name="priceGreen">#B7FFBF</color>-->
+
+<!--    <color name="card_background_2">#232830</color>-->
+<!--    <color name="note_text_color">@color/black_color</color>-->
+
+<!--    <color name="gbf1">#ee6135</color>-->
+<!--    <color name="gbf2">#e7e9eb</color>-->
+<!--    <color name="gbf3">#f3f3f5</color>-->
+<!--    <color name="gbf4">#807f7f</color>-->
+<!--    <color name="gbf5">#565656</color>-->
+<!--    <color name="gbf6">#656565</color>-->
+<!--    <color name="gbf7">#3c3c3c</color>-->
+<!--    <color name="gbf8">#89888a</color>-->
+<!--    <color name="gbf9">#777576</color>-->
+<!--    <color name="gbf10">#727070</color>-->
+<!--    <color name="gbf11">#5b5b5b</color>-->
+<!--    <color name="gbf12">#EA4750</color>-->
+
+
+<!--    <color name="snack_bar_bckg">#494949</color>-->
+<!--    <color name="invert_text_color">#000000</color>-->
+<!--    <color name="home_color_red">#D34343</color>-->
+<!--    <color name="clickable_color">#D34343</color>-->
+<!--    <color name="white_black">#FFFFFF</color>-->
+<!--    <color name="card_background_3">#494949</color>-->
+<!--    <color name="cancelled_card_background">#2F2F2F</color>-->
+<!--    <color name="grey_two">#494949</color>-->
+
+<!--    <color name="border_line">#3c3c3c</color>-->
+
+<!--    <color name="verification_failed">#FF0606</color>-->
+
+<!--    <color name="grey_three">#000000</color>-->
+<!--    <color name="yellow_light">#F8B01D</color>-->
+
+<!--    <color name="cart_item_back">#070E19</color>-->
+
+
+<!--    <color name="shadow_layer_1">#1AEFEDED</color>-->
+<!--    <color name="shadow_layer_3">#FFFFFF</color>-->
+<!--    <color name="app_color_both_mode">#FFFFFF</color>-->
+<!--    <color name="hyper_text_color">#03ACF7</color>-->
+<!--    <color name="color_only_left">#EA7A80</color>-->
+<!--    <color name="dark_blue">#063BA7</color>-->
+<!--    <color name="dialog_background">#333333</color>-->
+<!--    <color name="variant_selected_border">#FFFFFF</color>-->
+<!--    <color name="variant_un_selected_border">#FFFFFF</color>-->
+<!--    <color name="variant_selected_bg">#EA4750</color>-->
+<!--    <color name="variant_un_selected_bg">#17D8D7D7</color>-->
+<!--    <color name="sold_out_color">#ffffff</color>-->
+<!--    <color name="black_white">#212121</color>-->
+<!--    <color name="bg_redLight">#212121</color>-->
+<!--    <color name="color_grey1">#E2E0E0</color>-->
+<!--    <color name="categories_circle_color">#FFFFFF</color>-->
+<!--    <color name="red_inv_pink">#EA4750</color>-->
+<!--    <color name="invert_white_blue">#5268D1</color>-->
+<!--    <color name="drop_down_color">#2b3543</color>-->
+<!--    <color name="bottle_green_two">#60AB97</color>-->
+
+<!--    <color name="blue_one">#EA4750</color>-->
+<!--    <color name="blue_two">#EA4750</color>-->
+<!--    <color name="blue_three">#ec5962</color>-->
+<!--    <color name="blue_four">#ee6c73</color>-->
+<!--    <color name="blue_five">#f07e85</color>-->
+<!--    <color name="blue_six">#d34048</color>-->
+
+<!--    <color name="black_grey">#89888a</color>-->
+<!--    <color name="white_lightgrey">#E5E5E5</color>-->
+
+<!--    <color name="purple_one">#9f0d7f</color>-->
+
+<!--    <color name="proper_red">#cc0000</color>-->
+
+<!--    <color name="gray_one">#3d4b5f</color>-->
+<!--    <color name="gray_two">#525f71</color>-->
+<!--    <color name="dim_error_color">#50FF9B9B</color>-->
+<!--    <color name="ergos_button">#EA4750</color>-->
+<!--    <color name="maroon_red">#461518</color>-->
+
+<!--    <color name="violet_one">#46649C</color>-->
+
+
+<!--    <color name="anim_start_color">#D8A1A4</color>-->
+<!--    <color name="anim_center_color">#152A4A</color>-->
+<!--    <color name="dark_gray_mid">#131E2E</color>-->
+<!--    <color name="dark_gray_mid_2">#223653</color>-->
+<!--    <color name="light_app_color">#131E2E</color>-->
+<!--    <color name="anim_end_color">#131E2E</color>-->
+<!--    <color name="color_warning">#F3AA73</color>-->
+<!--    <color name="color_failed">#F17070</color>-->
+<!--    <color name="color_success">#33BF30</color>-->
+<!--    <color name="card_shadow_item">#ffffff</color>-->
+<!--    <color name="card_shadow">#FFFFFF</color>-->
+<!--    <color name="app_color_dark_icon">#ffffff</color>-->
+<!--    <color name="app_color_invert">#ffffff</color>-->
+<!--    <color name="color_white_invert">#000000</color>-->
+<!--    <color name="color_gray">#50575656</color>-->
+<!--    <color name="light_gray_2">#50575656</color>-->
+<!--    <color name="light_gray_3">#50575656</color>-->
+<!--    <color name="light_gray_4">#506D6D6D</color>-->
+<!--    <color name="light_gray_5">#575656</color>-->
+<!--    <color name="divider_color_dim">#30929292</color>-->
+<!--    <color name="new_blue">#80B3FF</color>-->
+<!--    <color name="image_bg_1">#ffffff</color>-->
+<!--    <color name="view_color">#646464</color>-->
+<!--    <color name="invert_white_black">#FFFFFF</color>-->
+
+<!--    <color name="color_lite_green">#8A8A8A</color>-->
+<!--    <color name="color_lite_green_2">#DADFC8</color>-->
+<!--    <color name="color_lite_blue">#9A9A9A</color>-->
+<!--    <color name="color_very_lite_blue">#616161</color>-->
+<!--    <color name="app_color_dark_both_mode">#EC5A62</color>-->
+<!--    <color name="olive_green">#3F5C3E</color>-->
+<!--    <color name="light_pink">#7D6B6C</color>-->
+<!--    <color name="light_pink_2">#625859</color>-->
+<!--    <color name="light_gray_warehouse">#182539</color>-->
+<!--    <color name="guest_user_back">#131E2E</color>-->
+<!--    <color name="black_trans">#B3131E2E</color>-->
+<!--    <color name="light_black">#B319273C</color>-->
+<!--    <color name="dark_light_gray">#B319273C</color>-->
+
+<!--    <color name="spot_offer_red">#D34343</color>-->
+<!--    <color name="green_text">#20E82B</color>-->
+<!--    <color name="orange_dark">#FFFFFF</color>-->
+<!--    <color name="app_color_dark_2">#C0BFBF</color>-->
+<!--    <color name="color_warning_red">#F6798B</color>-->
+<!--    <color name="light_blue">#3B4A71</color>-->
+<!--    <color name="light_blue_2">#6EB3F3</color>-->
+<!--    <color name="matte_gray">#7A8FD0</color>-->
+<!--    <color name="card_selected_3">#DEEFFE</color>-->
+<!--    <color name="gray_blue">#FFFFFF</color>-->
+<!--    <color name="counter_enter_card">#F0ECFF</color>-->
+<!--    <color name="blue_white">#3B229E</color>-->
+<!--    <color name="dashBoard_bg">#464646</color>-->
+<!--    <color name="seekbar_grey">#D9D9D9</color>-->
+<!--    <color name="seekbar_red">#ED646B</color>-->
+<!--    <color name="progressbar_color">#FFDCE0</color>-->
+<!--    <color name="status_bar">#FF912328</color>-->
+<!--    <color name="grey_line">#969696</color>-->
+<!--    <color name="invert_lite_white_black">#FFFFFF</color>-->
+<!--    <color name="color_gray_2_buyer">#081321</color>-->
+<!--    <color name="price_blue">#80B0F8</color>-->
+<!--    <color name="gray_arc">#232830</color>-->
+<!--    <color name="light_grey_2">#232830</color>-->
+<!--    <color name="accent_color">#EA4750</color>-->
+<!--    <color name="dialog_icon">#FFFFFF</color>-->
+<!--    <color name="card_background1">#FFFFFF</color>-->
+<!--    <color name="whiteBlackBg">#000000</color>-->
+<!--    <color name="whiteBlackText">#C8C7C7</color>-->
+</resources>
