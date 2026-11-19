@@ -11,6 +11,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +27,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
+import com.example.costlyticmoneymanagement.view.dialog.LogoutBottomSheet
 import com.example.costlyticmoneymanagement.view.uicomponent.CircularImageView
 import com.google.firebase.auth.FirebaseAuth
 
@@ -38,6 +43,7 @@ fun ProfileScreen(
 
     val lightGray1 = colorResource(id = R.color.light_gray1)
     val grayText = colorResource(id = R.color.gray_Text)
+    var showLogoutSheet by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -134,6 +140,9 @@ fun ProfileScreen(
                 color = lightGray1
             )
 
+
+
+
             // Logout Row
             ProfileMenuItem(
                 iconRes = R.drawable.ic_logout,
@@ -141,10 +150,20 @@ fun ProfileScreen(
                 title = "Logout",
                 fontFamily = manropeMedium,
                 onClick = {
-                    FirebaseAuth.getInstance().signOut()
-                    onLogoutSuccess()
+                    showLogoutSheet = true
                 }
             )
+
+            if (showLogoutSheet) {
+                LogoutBottomSheet(
+                    onDismiss = { showLogoutSheet = false },
+                    onConfirmLogout = {
+                        showLogoutSheet = false
+                        FirebaseAuth.getInstance().signOut()
+                        onLogoutSuccess()
+                    }
+                )
+            }
         }
     }
 }
