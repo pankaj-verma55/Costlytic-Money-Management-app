@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -56,7 +57,9 @@ fun SignUpScreen(
     val context = LocalContext.current
     val auth = remember { FirebaseAuth.getInstance() }
     val db = remember { FirebaseFirestore.getInstance() }
-
+    val databaseReference = remember {
+        FirebaseDatabase.getInstance().getReference("table_User")
+    }
     // Form States
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -99,6 +102,8 @@ fun SignUpScreen(
 
                     // Step 3: Save to Firestore using the UID as the Document ID
                     userId?.let { uid ->
+                        databaseReference.child(userId).setValue(userProfile)
+                        Log.d("Firebase--->", "User profile created for $userProfile")
                         db.collection("users").document(uid)
                             .set(userProfile)
                             .addOnSuccessListener {

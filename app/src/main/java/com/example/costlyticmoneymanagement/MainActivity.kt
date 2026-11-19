@@ -9,9 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.costlyticmoneymanagement.ui.theme.CostlyticMoneyManagementTheme
 import com.example.costlyticmoneymanagement.view.navigation.Screen
 import com.example.costlyticmoneymanagement.view.screen.CreateBudgetScreen
@@ -26,8 +28,10 @@ import com.example.costlyticmoneymanagement.view.screen.NotificationScreen
 import com.example.costlyticmoneymanagement.view.screen.ProfileDetailItemScreen
 import com.example.costlyticmoneymanagement.view.screen.SignUpScreen
 import com.example.costlyticmoneymanagement.view.screen.TransferScreen
+import com.example.costlyticmoneymanagement.view.screen.VerificationScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.pipeline.Expression.Companion.type
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +98,26 @@ class MainActivity : ComponentActivity() {
                         },
                         onNavigateToVerification = { otp ->
                             navController.navigate(Screen.Verification.createRoute(otp))
+                        }
+                    )
+                }
+                composable(
+                    route = Screen.Verification.route,
+                    arguments = listOf(
+                        navArgument("otp") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val otp = backStackEntry.arguments?.getString("otp") ?: ""
+                    val currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: "pv84*****@gmail.com"
+
+                    VerificationScreen(
+                        otp = otp,
+                        userEmail = currentEmail,
+                        onBackClick = { navController.popBackStack() },
+                        onVerificationSuccess = {
+                            navController.navigate(Screen.Dashboard.route) {
+                                popUpTo(Screen.Navigation.route) { inclusive = true }
+                            }
                         }
                     )
                 }

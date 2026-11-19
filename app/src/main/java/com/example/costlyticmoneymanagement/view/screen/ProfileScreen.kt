@@ -1,5 +1,6 @@
 package com.example.costlyticmoneymanagement.view.screen
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -30,6 +31,7 @@ import com.example.costlyticmoneymanagement.R
 import com.example.costlyticmoneymanagement.view.dialog.LogoutBottomSheet
 import com.example.costlyticmoneymanagement.view.uicomponent.CircularImageView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 @Composable
 fun ProfileScreen(
@@ -41,6 +43,10 @@ fun ProfileScreen(
     val manropeRegular = FontFamily(Font(R.font.manrope_regular))
     val manropeMedium = FontFamily(Font(R.font.manrope_medium))
 
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser?.uid
+    Log.d("Firebase--->", "User ID: $user")
+//    val email = user?.email
     val lightGray1 = colorResource(id = R.color.light_gray1)
     val grayText = colorResource(id = R.color.gray_Text)
     var showLogoutSheet by remember { mutableStateOf(false) }
@@ -159,7 +165,7 @@ fun ProfileScreen(
                     onDismiss = { showLogoutSheet = false },
                     onConfirmLogout = {
                         showLogoutSheet = false
-                        FirebaseAuth.getInstance().signOut()
+                        auth.signOut()
                         onLogoutSuccess()
                     }
                 )
