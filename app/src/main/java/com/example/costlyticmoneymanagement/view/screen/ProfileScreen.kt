@@ -43,7 +43,6 @@ fun ProfileScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(lightGray1)
-            .systemBarsPadding()
     ) {
         // 1. Profile Header Row (CircularImageView + Username/Name + Edit Button)
         Row(
