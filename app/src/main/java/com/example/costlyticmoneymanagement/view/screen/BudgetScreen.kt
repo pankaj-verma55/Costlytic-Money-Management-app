@@ -63,7 +63,6 @@ fun BudgetScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(purpleBlue)
-            .systemBarsPadding()
     ) {
         // 1. Top Title Bar (Optional back button if opened outside bottom nav)
         Box(
@@ -167,7 +166,6 @@ fun BudgetScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = dimensionResource(id = R.dimen.dimen_40))
-                            .padding(dimensionResource(id = R.dimen.dimen_16))
                     )
                 }
             } else {
