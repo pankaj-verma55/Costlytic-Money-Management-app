@@ -405,12 +405,15 @@ fun HomeTabContent(
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
+                            .padding(
+                                horizontal = dimensionResource(id = R.dimen.dimen_2),
+                                vertical = dimensionResource(id = R.dimen.dimen_2)
+                            )
                             .weight(1f)
                             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.dimen_16)))
                             .background(if (isSelected) Color(0xFFFCEED4) else Color.Transparent)
                             .clickable { selectedFilterTab = tab }
                             .padding(
-                                horizontal = dimensionResource(id = R.dimen.dimen_12),
                                 vertical = dimensionResource(id = R.dimen.dimen_8)
                             )
                     ) {
