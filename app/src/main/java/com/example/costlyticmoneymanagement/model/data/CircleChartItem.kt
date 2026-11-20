@@ -1,4 +1,4 @@
-package com.example.costlyticmoneymanagement.data
+package com.example.costlyticmoneymanagement.model.data
 
 data class CircleChartItem(
     val value: Float,

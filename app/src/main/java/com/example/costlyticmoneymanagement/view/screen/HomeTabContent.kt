@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.Costlytic.Utils.Constant
 import com.example.costlyticmoneymanagement.R
-import com.example.costlyticmoneymanagement.data.DashboardHistoryDataItem
+import com.example.costlyticmoneymanagement.model.data.DashboardHistoryDataItem
 import com.example.costlyticmoneymanagement.view.uicomponent.CircularImageView
 import com.example.costlyticmoneymanagement.view.uicomponent.LineChartView
 

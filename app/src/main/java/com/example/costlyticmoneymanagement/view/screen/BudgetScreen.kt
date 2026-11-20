@@ -1,14 +1,11 @@
 package com.example.costlyticmoneymanagement.view.screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,8 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
-import com.example.costlyticmoneymanagement.data.BudgetItem
-import com.example.costlyticmoneymanagement.view.uicomponent.RoundedProgressBar
+import com.example.costlyticmoneymanagement.model.data.BudgetItem
 
 
 @Composable

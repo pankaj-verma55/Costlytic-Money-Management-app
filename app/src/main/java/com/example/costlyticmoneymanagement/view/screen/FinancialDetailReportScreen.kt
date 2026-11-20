@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
-import com.example.costlyticmoneymanagement.data.CircleChartItem
+import com.example.costlyticmoneymanagement.model.data.CircleChartItem
 import com.example.costlyticmoneymanagement.view.uicomponent.LineChartView
 import com.example.costlyticmoneymanagement.view.uicomponent.MulticolorCircleChart
 import com.example.costlyticmoneymanagement.view.uicomponent.RoundedProgressBar

@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
-import com.example.costlyticmoneymanagement.data.BudgetItem
+import com.example.costlyticmoneymanagement.model.data.BudgetItem
 import com.example.costlyticmoneymanagement.view.uicomponent.RoundedProgressBar
 
 @Composable

@@ -31,7 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
-import com.example.costlyticmoneymanagement.data.TransactionListItem
+import com.example.costlyticmoneymanagement.model.data.TransactionListItem
 import com.example.costlyticmoneymanagement.utils.RenderUrlImage
 
 @OptIn(ExperimentalMaterial3Api::class)
