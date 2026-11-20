@@ -32,6 +32,7 @@ import com.example.costlyticmoneymanagement.view.dialog.LogoutBottomSheet
 import com.example.costlyticmoneymanagement.view.uicomponent.CircularImageView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
 
 @Composable
 fun ProfileScreen(
@@ -44,13 +45,26 @@ fun ProfileScreen(
     val manropeMedium = FontFamily(Font(R.font.manrope_medium))
 
     val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance()
+        .getReference("table_User")
     val user = auth.currentUser?.uid
     Log.d("Firebase--->", "User ID: $user")
-//    val email = user?.email
+    var email by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+//    var phone by remember { mutableStateOf("") }
     val lightGray1 = colorResource(id = R.color.light_gray1)
     val grayText = colorResource(id = R.color.gray_Text)
     var showLogoutSheet by remember { mutableStateOf(false) }
 
+    if(user != null) {
+        database.child(user).get()
+            .addOnSuccessListener {
+                name = it.child("name").value.toString()
+                email = it.child("email").value.toString()
+//                phone = it.child("phone").value.toString()
+            }
+            .addOnFailureListener {  }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,14 +90,14 @@ fun ProfileScreen(
                     .padding(start = dimensionResource(id = R.dimen.dimen_20))
             ) {
                 Text(
-                    text = "pankaj@123",
+                    text = email,
                     fontSize = 16.sp,
                     fontFamily = manropeRegular,
                     color = grayText
                 )
 
                 Text(
-                    text = "Pankaj Verma",
+                    text = name,
                     fontFamily = manropeMedium,
                     fontSize = 26.sp,
                     color = Color.Black
