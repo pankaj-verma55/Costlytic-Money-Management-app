@@ -6,9 +6,12 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,8 +54,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.FileProvider
 import com.example.costlyticmoneymanagement.R
+import com.example.costlyticmoneymanagement.view.uicomponent.CategoryDropdownField
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import java.io.File
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoneyTransactionContent(
@@ -62,13 +69,29 @@ fun MoneyTransactionContent(
     onContinueClick: (amount: String, category: String, description: String, wallet: String, isRepeat: Boolean) -> Unit
 ) {
     val context = LocalContext.current
+//    var isExpended by remember { mutableStateOf(false) }
+    val listCategories = remember {
+        listOf("Shopping", "Subscription", "Food", "Transportation", "Bills", "Salary")
+    }
+    val listWallet = remember {
+        listOf("Salary", "Freelance", "Business", "Investment")
+    }
 
-    // Form States (matching fragment_expense.xml & fragment_income.xml)
+    var isSaving by remember { mutableStateOf(false) }
     var amount by remember { mutableStateOf("₹0") }
     var category by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var wallet by remember { mutableStateOf("") }
     var isRepeat by remember { mutableStateOf(false) }
+//    FireBase Code
+    val tableName = if (title.equals("Income", ignoreCase = true))
+        "table_Income" else "table_Expense"
+    val auth = FirebaseAuth.getInstance()
+    val user = auth.currentUser?.uid
+    val databaseRef = remember(tableName) {
+        FirebaseDatabase.getInstance().getReference(tableName)
+    }
+    Log.d("Firebase--->", "Income User ID: $databaseRef")
 
     // Attachment States
     var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
@@ -121,7 +144,21 @@ fun MoneyTransactionContent(
     val purpleBlue = colorResource(id = R.color.purple_blue)
     val lightWhite = colorResource(id = R.color.light_white)
     val lightPurpleBlue2 = colorResource(id = R.color.light_purple_blue2)
-
+//    LaunchedEffect(user) {
+//        if(user != null) {
+//            databaseIncome.child(user).get()
+//                .addOnSuccessListener {
+//                    amount = it.child("amount").value.toString()
+//                    category = it.child("category").value.toString()
+//                    description = it.child("description").value.toString()
+//                    wallet = it.child("wallet").value.toString()
+//                    isRepeat = it.child("isRepeat").value.toString().toBoolean()
+//
+////                phone = it.child("phone").value.toString()
+//                }
+//                .addOnFailureListener {  }
+//        }
+//    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -189,15 +226,11 @@ fun MoneyTransactionContent(
                 .background(Color.White)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Category Input
-            TransactionInputField(
-                value = category,
-                onValueChange = { category = it },
-                placeholder = "Category",
-                fontFamily = interMedium,
-                hintColor = hintText,
-                textColor = darkBlack,
-                showDropdownArrow = true
+            CategoryDropdownField(
+                categories = listCategories,
+                selectedCategory = category,
+                onCategorySelected = { category = it },
+                placeholderText = "Category"
             )
 
             // Description Input
@@ -211,15 +244,11 @@ fun MoneyTransactionContent(
                 showDropdownArrow = false
             )
 
-            // Wallet Input
-            TransactionInputField(
-                value = wallet,
-                onValueChange = { wallet = it },
-                placeholder = "Wallet",
-                fontFamily = interMedium,
-                hintColor = hintText,
-                textColor = darkBlack,
-                showDropdownArrow = true
+            CategoryDropdownField(
+                categories = listWallet,
+                selectedCategory = wallet,
+                onCategorySelected = { wallet = it },
+                placeholderText = "Wallet"
             )
 
             // Attachment Section (Selected Image / Selected File / Dotted Add Attachment Box)
@@ -236,12 +265,14 @@ fun MoneyTransactionContent(
                             runCatching {
                                 selectedImageUri?.let { uri ->
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                                        val source = ImageDecoder.createSource(context.contentResolver, uri)
+                                        val source =
+                                            ImageDecoder.createSource(context.contentResolver, uri)
                                         ImageDecoder.decodeBitmap(source).asImageBitmap()
                                     } else {
-                                        context.contentResolver.openInputStream(uri)?.use { stream ->
-                                            BitmapFactory.decodeStream(stream)?.asImageBitmap()
-                                        }
+                                        context.contentResolver.openInputStream(uri)
+                                            ?.use { stream ->
+                                                BitmapFactory.decodeStream(stream)?.asImageBitmap()
+                                            }
                                     }
                                 }
                             }.getOrNull()
@@ -397,10 +428,80 @@ fun MoneyTransactionContent(
             Spacer(modifier = Modifier.weight(1f))
 
             // Continue Button -> triggers callback AND shows TransactionSuccessDone dialog
+//            Button(
+//                onClick = {
+//                    onContinueClick(amount, category, description, wallet, isRepeat)
+//                    showSuccessDialog = true
+//                },
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = purpleBlue,
+//                    contentColor = Color.White
+//                ),
+//                shape = RoundedCornerShape(16.dp),
+//                contentPadding = PaddingValues(vertical = 18.dp),
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(horizontal = dimensionResource(id = R.dimen.dimen_16))
+//                    .padding(
+//                        top = dimensionResource(id = R.dimen.dimen_24),
+//                        bottom = dimensionResource(id = R.dimen.dimen_15)
+//                    )
+//            ) {
+//                Text(
+//                    text = "Continue",
+//                    fontSize = 20.sp,
+//                    color = Color.White
+//                )
+//            }
             Button(
+                enabled = !isSaving,
                 onClick = {
-                    onContinueClick(amount, category, description, wallet, isRepeat)
-                    showSuccessDialog = true
+                    val cleanAmount = amount.replace("₹", "").trim()
+                    if (cleanAmount.isEmpty() || cleanAmount == "0") {
+                        Toast.makeText(context, "Please enter an amount", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (category.isEmpty()) {
+                        Toast.makeText(context, "Please select a category", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (wallet.isEmpty()) {
+                        Toast.makeText(context, "Please select a Wallet", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (user == null) {
+                        Toast.makeText(context, "User not logged in", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    isSaving = true
+                    val entryRef = databaseRef.child(user).push()
+
+                    val transactionData = mapOf(
+                        "id" to (entryRef.key ?: ""),
+                        "type" to title,
+                        "amount" to amount,
+                        "category" to category,
+                        "description" to description,
+                        "wallet" to wallet,
+                        "isRepeat" to isRepeat,
+                        "timestamp" to System.currentTimeMillis()
+                    )
+
+                    entryRef.setValue(transactionData)
+                        .addOnSuccessListener {
+                            isSaving = false
+                            onContinueClick(amount, category, description, wallet, isRepeat)
+                            showSuccessDialog = true
+                        }
+                        .addOnFailureListener { e ->
+                            isSaving = false
+                            Toast.makeText(
+                                context,
+                                "Failed to save: ${e.localizedMessage}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = purpleBlue,
@@ -416,11 +517,19 @@ fun MoneyTransactionContent(
                         bottom = dimensionResource(id = R.dimen.dimen_15)
                     )
             ) {
-                Text(
-                    text = "Continue",
-                    fontSize = 20.sp,
-                    color = Color.White
-                )
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        strokeWidth = 2.5.dp,
+                        modifier = Modifier.size(22.dp)
+                    )
+                } else {
+                    Text(
+                        text = "Continue",
+                        fontSize = 20.sp,
+                        color = Color.White
+                    )
+                }
             }
         }
     }

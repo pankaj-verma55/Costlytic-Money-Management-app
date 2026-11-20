@@ -42,6 +42,8 @@ import com.example.costlyticmoneymanagement.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -51,7 +53,7 @@ fun LoginScreen(
     onForgetPasswordClick: () -> Unit
 ) {
     val context = LocalContext.current
-
+    val coroutineScope = rememberCoroutineScope()
     // Form States
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -69,21 +71,34 @@ fun LoginScreen(
     val blackText = colorResource(id = R.color.black_text)
     val hintText = colorResource(id = R.color.hint_text)
 
+    var isLoading by remember { mutableStateOf(false) }
+
     fun isValidEmail(target: CharSequence): Boolean {
         return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches()
     }
 
-    fun loginUser(emailInput: String,
-                  passInput: String,
-                  onEmailError: (String) -> Unit,
-                  onPasswordError: (String) -> Unit) {
-
-        auth.signInWithEmailAndPassword(emailInput, passInput)
-            .addOnSuccessListener {
+    fun loginUser(
+        emailInput: String,
+        passInput: String,
+        onEmailError: (String) -> Unit,
+        onPasswordError: (String) -> Unit
+    ) {
+        isLoading = true
+        val timeoutJob = coroutineScope.launch {
+            kotlinx.coroutines.delay(15_000L)
+            if (isLoading) {
+                isLoading = false
+                onPasswordError("Network timeout. Check your internet connection and try again.")
+            }
+        }
+        auth.signInWithEmailAndPassword(emailInput, passInput).addOnSuccessListener {
+            timeoutJob.cancel()
+            isLoading = false
                 Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
                 onLoginSuccess()
-            }
-            .addOnFailureListener { exception ->
+            }.addOnFailureListener { exception ->
+                timeoutJob.cancel()
+            isLoading = false
                 when (exception) {
                     is FirebaseAuthInvalidUserException -> {
                         onEmailError("Email is not registered")
@@ -92,6 +107,7 @@ fun LoginScreen(
                     is FirebaseAuthInvalidCredentialsException -> {
                         onPasswordError("Incorrect password")
                     }
+
                     else -> {
                         onPasswordError(exception.localizedMessage ?: "Authentication failed")
                     }
@@ -117,8 +133,7 @@ fun LoginScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .clickable { onBackClick() }
-            )
+                    .clickable { onBackClick() })
 
             Text(
                 text = "Login",
@@ -137,45 +152,32 @@ fun LoginScreen(
                 .padding(top = dimensionResource(id = R.dimen.dimen_72))
         ) {
             TextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    if (emailError != null) emailError = null
-                },
-                placeholder = {
-                    Text(
-                        text = "Email",
-                        fontFamily = interMedium,
-                        fontSize = 16.sp,
-                        color = hintText
-                    )
-                },
-                textStyle = TextStyle(
-                    fontFamily = interMedium,
-                    fontSize = 16.sp,
-                    color = blackText
-                ),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    autoCorrectEnabled = true
-                ),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent
-                ),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
+                value = email, onValueChange = {
+                email = it
+                if (emailError != null) emailError = null
+            }, placeholder = {
+                Text(
+                    text = "Email", fontFamily = interMedium, fontSize = 16.sp, color = hintText
+                )
+            }, textStyle = TextStyle(
+                fontFamily = interMedium, fontSize = 16.sp, color = blackText
+            ), singleLine = true, keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email, autoCorrectEnabled = true
+            ), colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
+            ), shape = RoundedCornerShape(16.dp), modifier = Modifier
                     .fillMaxWidth()
                     .border(
                         border = BorderStroke(
                             width = 1.dp,
-                            color = if (emailError != null) MaterialTheme.colorScheme.error else Color(0xFFF1F1FA)
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                            color = if (emailError != null) MaterialTheme.colorScheme.error else Color(
+                                0xFFF1F1FA
+                            )
+                        ), shape = RoundedCornerShape(16.dp)
                     )
             )
 
@@ -211,15 +213,14 @@ fun LoginScreen(
                     )
                 },
                 textStyle = TextStyle(
-                    fontFamily = interMedium,
-                    fontSize = 16.sp,
-                    color = blackText
+                    fontFamily = interMedium, fontSize = 16.sp, color = blackText
                 ),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
-                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    val image =
+                        if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = image,
@@ -241,9 +242,10 @@ fun LoginScreen(
                     .border(
                         border = BorderStroke(
                             width = 1.dp,
-                            color = if (passwordError != null) MaterialTheme.colorScheme.error else Color(0xFFF1F1FA)
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                            color = if (passwordError != null) MaterialTheme.colorScheme.error else Color(
+                                0xFFF1F1FA
+                            )
+                        ), shape = RoundedCornerShape(16.dp)
                     )
             )
 
@@ -259,6 +261,7 @@ fun LoginScreen(
 
         // Login Button
         Button(
+            enabled = !isLoading,
             onClick = {
                 emailError = null
                 passwordError = null
@@ -270,18 +273,18 @@ fun LoginScreen(
                     emailError = "InValid email address"
                 } else if (password.isEmpty()) {
                     passwordError = "Password is required"
-                } else if (password.length < 8 || password.length > 16) {
+                } else if (password.length !in 8..16) {
                     passwordError = "Password must be at least 8 to 16 characters long"
                 } else {
-                    loginUser(emailInput = trimmedEmail,
+                    loginUser(
+                        emailInput = trimmedEmail,
                         passInput = password,
                         onEmailError = { msg -> emailError = msg },
                         onPasswordError = { msg -> passwordError = msg })
                 }
             },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF7F3DFF),
-                contentColor = Color.White
+                containerColor = Color(0xFF7F3DFF), contentColor = Color.White
             ),
             shape = RoundedCornerShape(16.dp),
             contentPadding = PaddingValues(vertical = 16.dp),
@@ -290,12 +293,24 @@ fun LoginScreen(
                 .padding(horizontal = 20.dp)
                 .padding(top = dimensionResource(id = R.dimen.dimen_27), bottom = 20.dp)
         ) {
-            Text(
-                text = "Login",
-                fontFamily = interBold,
-                fontSize = 18.sp,
-                color = Color.White
-            )
+
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 2.5.dp,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Text(
+                    text = "Login",
+                    fontFamily = interBold,
+                    fontSize = 18.sp,
+                    color = Color.White
+                )
+            }
+//            Text(
+//                text = "Login", fontFamily = interBold, fontSize = 18.sp, color = Color.White
+//            )
         }
 
         // Forget Password Text
@@ -307,8 +322,7 @@ fun LoginScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = dimensionResource(id = R.dimen.dimen_33))
-                .clickable { onForgetPasswordClick() }
-        )
+                .clickable { onForgetPasswordClick() })
 
         // Sign Up Spannable Text
         val signUpAnnotatedText = buildAnnotatedString {
@@ -329,7 +343,6 @@ fun LoginScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = dimensionResource(id = R.dimen.dimen_20))
-                .clickable { onSignUpClick() }
-        )
+                .clickable { onSignUpClick() })
     }
 }

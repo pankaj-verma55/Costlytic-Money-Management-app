@@ -1,5 +1,10 @@
 package com.example.costlyticmoneymanagement.view.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -7,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -25,7 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.costlyticmoneymanagement.R
-import com.example.costlyticmoneymanagement.data.TransactionListItem
+import com.example.costlyticmoneymanagement.model.data.TransactionListItem
 import com.example.costlyticmoneymanagement.utils.RenderUrlImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +67,15 @@ fun TransactionScreen(
             )
         )
     }
+
+    val monthOptions = remember {
+        listOf(
+            "Yearly", "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        )
+    }
+    var selectedMonth by remember { mutableStateOf("Month") }
+    var isMonthSliderVisible by remember { mutableStateOf(false) }
 
     // Filter Dialog State
     var showFilterSheet by remember { mutableStateOf(false) }
@@ -99,10 +114,18 @@ fun TransactionScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        if (selectedMonth != "Month") Color(0xFFEEE5FF) else Color.Transparent
+                    )
                     .border(
-                        border = BorderStroke(1.dp, Color(0xFFF1F1FA)),
+                        border = BorderStroke(
+                            1.dp,
+                            if (selectedMonth != "Month") purpleBlue else Color(0xFFF1F1FA)
+                        ),
                         shape = RoundedCornerShape(20.dp)
                     )
+                    .clickable { isMonthSliderVisible = !isMonthSliderVisible }
                     .padding(
                         horizontal = dimensionResource(id = R.dimen.dimen_12),
                         vertical = 5.dp
@@ -110,13 +133,14 @@ fun TransactionScreen(
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.down_arrow),
-                    contentDescription = "Select Month",
+                    contentDescription = "down Arrow",
                     modifier = Modifier.padding(end = 5.dp)
                 )
                 Text(
-                    text = "Month",
-                    color = Color.Black,
-                    fontSize = 16.sp
+                    text = selectedMonth,
+                    color = if (selectedMonth != "Month") purpleBlue else Color.Black,
+                    fontSize = 16.sp,
+                    fontFamily = manropeSemiBold
                 )
             }
 
@@ -128,6 +152,42 @@ fun TransactionScreen(
                     .clickable { showFilterSheet = true }
                     .padding(4.dp)
             )
+        }
+
+        AnimatedVisibility(
+            visible = isMonthSliderVisible,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(monthOptions) { month ->
+                    val isSelected = selectedMonth == month || (selectedMonth == "Month" && month == "All")
+
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(if (isSelected) purpleBlue else Color(0xFFEEE5FF))
+                            .clickable {
+                                selectedMonth = month
+                                isMonthSliderVisible = false
+                                // Filter dashboard transactions / chart data by `month` here
+                            }
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = month,
+                            fontSize = 14.sp,
+                            fontFamily = manropeSemiBold,
+                            color = if (isSelected) Color.White else purpleBlue
+                        )
+                    }
+                }
+            }
         }
 
         // 2. "See your financial report" Banner (Replaces reportLayout)

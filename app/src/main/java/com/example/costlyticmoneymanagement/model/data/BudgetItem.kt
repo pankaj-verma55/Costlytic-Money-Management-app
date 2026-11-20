@@ -1,4 +1,4 @@
-package com.example.costlyticmoneymanagement.data
+package com.example.costlyticmoneymanagement.model.data
 
 import androidx.compose.ui.graphics.Color
 
