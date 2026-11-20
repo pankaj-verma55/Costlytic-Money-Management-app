@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,14 +57,16 @@ fun ProfileScreen(
     val grayText = colorResource(id = R.color.gray_Text)
     var showLogoutSheet by remember { mutableStateOf(false) }
 
-    if(user != null) {
-        database.child(user).get()
-            .addOnSuccessListener {
-                name = it.child("name").value.toString()
-                email = it.child("email").value.toString()
+    LaunchedEffect(user) {
+        if(user != null) {
+            database.child(user).get()
+                .addOnSuccessListener {
+                    name = it.child("name").value.toString()
+                    email = it.child("email").value.toString()
 //                phone = it.child("phone").value.toString()
-            }
-            .addOnFailureListener {  }
+                }
+                .addOnFailureListener {  }
+        }
     }
     Column(
         modifier = Modifier

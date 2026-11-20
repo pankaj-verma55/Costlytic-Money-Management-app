@@ -490,7 +490,7 @@ fun SignUpScreen(
                     phoneError = "Phone number must be 10 digits"
                 } else if (password.isEmpty()) {
                     passwordError = "Password is required"
-                } else if (password.length < 8 || password.length > 16) {
+                } else if (password.length !in 8..16) {
                     passwordError = "Password must be at least 8 to 16 characters long"
                 } else {
                     createUser(email, password, name, phone)
