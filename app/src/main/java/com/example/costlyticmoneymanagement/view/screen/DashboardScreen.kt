@@ -75,6 +75,7 @@ fun DashboardScreen(
                         yellowColor = yellowColor,
                         redColor = redColor,
                         onNotificationClick = onNotificationClick,
+                        onNavigateToProfile= {selectedBottomTab = 4},
                         onNavigateToMoney = onNavigateToMoney
                     )
                 }

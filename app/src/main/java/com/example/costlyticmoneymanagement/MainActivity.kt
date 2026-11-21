@@ -31,7 +31,6 @@ import com.example.costlyticmoneymanagement.view.screen.TransferScreen
 import com.example.costlyticmoneymanagement.view.screen.VerificationScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.pipeline.Expression.Companion.type
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

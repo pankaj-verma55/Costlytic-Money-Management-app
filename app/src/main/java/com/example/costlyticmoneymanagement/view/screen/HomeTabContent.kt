@@ -51,6 +51,7 @@ fun HomeTabContent(
     yellowColor: Color,
     redColor: Color,
     onNotificationClick: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToMoney: (typeKey: String, typeValue: String) -> Unit
 ) {
     val dummyList = remember {
@@ -150,7 +151,9 @@ fun HomeTabContent(
             ) {
                 CircularImageView(
                     resId = R.drawable.profile,
-                    modifier = Modifier.size(42.dp)
+                    modifier = Modifier.size(42.dp).clickable{
+                        onNavigateToProfile()
+                    }
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
