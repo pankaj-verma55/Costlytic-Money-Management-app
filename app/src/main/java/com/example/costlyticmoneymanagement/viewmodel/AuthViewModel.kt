@@ -95,6 +95,9 @@ class AuthViewModel(
                 is AuthResult.EmailError -> emailError = result.message
                 is AuthResult.PasswordError -> passwordError = result.message
                 is AuthResult.GeneralError -> passwordError = result.message
+                else -> {
+
+                }
             }
         }
     }
@@ -167,6 +170,7 @@ class AuthViewModel(
                 is AuthResult.EmailError -> emailError = result.message
                 is AuthResult.PasswordError -> passwordError = result.message
                 is AuthResult.GeneralError -> generalError = result.message
+                else -> {}
             }
         }
     }
