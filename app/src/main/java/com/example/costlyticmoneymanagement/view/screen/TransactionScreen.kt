@@ -30,43 +30,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.costlyticmoneymanagement.R
 import com.example.costlyticmoneymanagement.model.data.TransactionListItem
 import com.example.costlyticmoneymanagement.utils.RenderUrlImage
+import com.example.costlyticmoneymanagement.viewmodel.TransactionListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionScreen(
-    onNavigateToFinancialReport: () -> Unit = {}
+    onNavigateToFinancialReport: () -> Unit = {},
+    transactionListViewModel: TransactionListViewModel = viewModel()
 ) {
-    // Exact dummy data from TransactionFragment.prepareData()
-    val transactionList = remember {
-        listOf(
-            TransactionListItem.Header("Today"),
-            TransactionListItem.Transaction(
-                image = "https://via.placeholder.com/100",
-                title = "Shopping",
-                subtitle = "Buy some grocery",
-                price = "-120",
-                time = "11:00 AM"
-            ),
-            TransactionListItem.Transaction(
-                image = "https://via.placeholder.com/100",
-                title = "Food",
-                subtitle = "Buy a ramen",
-                price = "-32",
-                time = "07:30 PM"
-            ),
-            TransactionListItem.Header("Yesterday"),
-            TransactionListItem.Transaction(
-                image = "https://via.placeholder.com/100",
-                title = "Salary",
-                subtitle = "Salary for July",
-                price = "+5000",
-                time = "04:30 PM"
-            )
-        )
-    }
+    val uiState by transactionListViewModel.uiState.collectAsState()
+    val selectedMonth = transactionListViewModel.selectedMonth
+//    // Exact dummy data from TransactionFragment.prepareData()
+//    val transactionList = remember {
+//        listOf(
+//            TransactionListItem.Header("Today"),
+//            TransactionListItem.Transaction(
+//                image = "https://via.placeholder.com/100",
+//                title = "Shopping",
+//                subtitle = "Buy some grocery",
+//                price = "-120",
+//                time = "11:00 AM"
+//            ),
+//            TransactionListItem.Transaction(
+//                image = "https://via.placeholder.com/100",
+//                title = "Food",
+//                subtitle = "Buy a ramen",
+//                price = "-32",
+//                time = "07:30 PM"
+//            ),
+//            TransactionListItem.Header("Yesterday"),
+//            TransactionListItem.Transaction(
+//                image = "https://via.placeholder.com/100",
+//                title = "Salary",
+//                subtitle = "Salary for July",
+//                price = "+5000",
+//                time = "04:30 PM"
+//            )
+//        )
+//    }
 
     val monthOptions = remember {
         listOf(
@@ -74,13 +79,8 @@ fun TransactionScreen(
             "July", "August", "September", "October", "November", "December"
         )
     }
-    var selectedMonth by remember { mutableStateOf("Month") }
     var isMonthSliderVisible by remember { mutableStateOf(false) }
-
-    // Filter Dialog State
     var showFilterSheet by remember { mutableStateOf(false) }
-    var selectedFilterBy by remember { mutableStateOf<String?>(null) }
-    var selectedSortBy by remember { mutableStateOf<String?>(null) }
 
     // Fonts & Colors
     val manropeLight = FontFamily(Font(R.font.manrope_light))
@@ -99,7 +99,7 @@ fun TransactionScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .systemBarsPadding()
+//            .systemBarsPadding()
     ) {
         // 1. Top Bar: Month Pill & Filter Icon
         Row(
@@ -110,7 +110,6 @@ fun TransactionScreen(
                 .padding(horizontal = dimensionResource(id = R.dimen.dimen_16))
                 .padding(top = dimensionResource(id = R.dimen.dimen_16))
         ) {
-            // Month Selector Pill (Replaces monthLayout)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -144,7 +143,6 @@ fun TransactionScreen(
                 )
             }
 
-            // Filter Icon (Replaces filterIcon)
             Image(
                 painter = painterResource(id = R.drawable.ic_filter_icon),
                 contentDescription = "Filter Transactions",
@@ -165,7 +163,8 @@ fun TransactionScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(monthOptions) { month ->
-                    val isSelected = selectedMonth == month || (selectedMonth == "Month" && month == "All")
+                    val isSelected =
+                        selectedMonth == month || (selectedMonth == "Month" && month == "Yearly")
 
                     Box(
                         contentAlignment = Alignment.Center,
@@ -173,9 +172,8 @@ fun TransactionScreen(
                             .clip(RoundedCornerShape(20.dp))
                             .background(if (isSelected) purpleBlue else Color(0xFFEEE5FF))
                             .clickable {
-                                selectedMonth = month
+                                transactionListViewModel.selectMonth(month)
                                 isMonthSliderVisible = false
-                                // Filter dashboard transactions / chart data by `month` here
                             }
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
@@ -190,7 +188,7 @@ fun TransactionScreen(
             }
         }
 
-        // 2. "See your financial report" Banner (Replaces reportLayout)
+        // 2. "See your financial report" Banner
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -217,46 +215,69 @@ fun TransactionScreen(
             )
         }
 
-        // 3. Multi-Type Transaction List (Replaces rvList + TransactionAdapter)
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = dimensionResource(id = R.dimen.dimen_16))
-        ) {
-            items(transactionList) { item ->
-                when (item) {
-                    is TransactionListItem.Header -> {
-                        // Replaces ItemHeaderBinding (item_header.xml)
-                        Text(
-                            text = item.title,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = dimensionResource(id = R.dimen.dimen_16))
-                        )
-                    }
+        // 3. Multi-Type Live Transaction List
+        if (uiState.isLoading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                CircularProgressIndicator(color = purpleBlue)
+            }
+        } else if (uiState.items.isEmpty()) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                Text(
+                    text = "No transactions found",
+                    fontFamily = manropeSemiBold,
+                    fontSize = 16.sp,
+                    color = grayText
+                )
+            }
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = dimensionResource(id = R.dimen.dimen_16))
+            ) {
+                items(uiState.items) { item ->
+                    when (item) {
+                        is TransactionListItem.Header -> {
+                            Text(
+                                text = item.title,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = dimensionResource(id = R.dimen.dimen_16))
+                            )
+                        }
 
-                    is TransactionListItem.Transaction -> {
-                        // Replaces TransactionViewHolder (dashboard_histrory_item.xml)
-                        TransactionRowItem(
-                            item = item,
-                            manropeBold = manropeBold,
-                            manropeSemiBold = manropeSemiBold,
-                            grayText = grayText,
-                            positiveColor = holoGreenDark,
-                            negativeColor = holoRedDark
-                        )
+                        is TransactionListItem.Transaction -> {
+                            TransactionRowItem(
+                                item = item,
+                                manropeBold = manropeBold,
+                                manropeSemiBold = manropeSemiBold,
+                                grayText = grayText,
+                                positiveColor = holoGreenDark,
+                                negativeColor = holoRedDark
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-    // 4. Filter Bottom Sheet (Replaces TransactionFilterDialog)
+    // 4. Filter Bottom Sheet
     if (showFilterSheet) {
         ModalBottomSheet(
             onDismissRequest = { showFilterSheet = false },
@@ -273,15 +294,13 @@ fun TransactionScreen(
             }
         ) {
             TransactionFilterSheetContent(
-                selectedFilterBy = selectedFilterBy,
-                selectedSortBy = selectedSortBy,
-                onFilterBySelected = { selectedFilterBy = it },
-                onSortBySelected = { selectedSortBy = it },
-                onResetClick = {
-                    selectedFilterBy = null
-                    selectedSortBy = null
-                },
+                selectedFilterBy = transactionListViewModel.tempFilterBy,
+                selectedSortBy = transactionListViewModel.tempSortBy,
+                onFilterBySelected = { transactionListViewModel.selectTempFilterBy(it) },
+                onSortBySelected = { transactionListViewModel.selectTempSortBy(it) },
+                onResetClick = { transactionListViewModel.resetFilters() },
                 onApplyClick = {
+                    transactionListViewModel.applyFilters()
                     showFilterSheet = false
                 },
                 manropeMedium = manropeMedium,
@@ -303,6 +322,8 @@ private fun TransactionRowItem(
     positiveColor: Color,
     negativeColor: Color
 ) {
+    val isNegative = item.price.startsWith("-")
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -315,13 +336,23 @@ private fun TransactionRowItem(
                 vertical = 14.dp
             )
     ) {
-        RenderUrlImage(
-            imageUrl = item.image,
-            contentDescription = item.title,
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(16.dp))
-        )
+        if (item.image.isNotBlank()) {
+            RenderUrlImage(
+                imageUrl = item.image,
+                contentDescription = item.title,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            )
+        } else {
+            Image(
+                painter = painterResource(
+                    id = if (isNegative) R.drawable.expense else R.drawable.ic_income
+                ),
+                contentDescription = item.title,
+                modifier = Modifier.size(48.dp)
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -347,7 +378,7 @@ private fun TransactionRowItem(
                 text = item.price,
                 fontFamily = manropeBold,
                 fontSize = 18.sp,
-                color = if (item.price.startsWith("-")) negativeColor else positiveColor
+                color = if (isNegative) negativeColor else positiveColor
             )
             Text(
                 text = item.time,
@@ -378,7 +409,6 @@ private fun TransactionFilterSheetContent(
             .fillMaxWidth()
             .padding(bottom = 20.dp)
     ) {
-        // Title + Reset Pill Row
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -411,7 +441,6 @@ private fun TransactionFilterSheetContent(
             }
         }
 
-        // "Filted By" Section (exact spelling from transaction_filter_dialog.xml)
         Text(
             text = "Filted By",
             fontFamily = manropeBold,
@@ -422,7 +451,7 @@ private fun TransactionFilterSheetContent(
                 .padding(top = dimensionResource(id = R.dimen.dimen_20))
         )
 
-        val filterOptions = listOf("Month", "Expense", "Transfer")
+        val filterOptions = listOf("Income", "Expense", "Transfer")
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
@@ -444,7 +473,6 @@ private fun TransactionFilterSheetContent(
             }
         }
 
-        // "Sort By" Section
         Text(
             text = "Sort By",
             fontFamily = manropeBold,
@@ -477,7 +505,6 @@ private fun TransactionFilterSheetContent(
             }
         }
 
-        // Apply Button
         Button(
             onClick = onApplyClick,
             colors = ButtonDefaults.buttonColors(
