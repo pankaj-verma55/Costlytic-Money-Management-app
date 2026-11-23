@@ -19,9 +19,15 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.costlyticmoneymanagement.R
 import com.example.costlyticmoneymanagement.model.data.DashboardHistoryDataItem
+import com.example.costlyticmoneymanagement.model.data.TransactionRecord
 import com.example.costlyticmoneymanagement.utils.RenderUrlImage
+import com.example.costlyticmoneymanagement.viewmodel.DashboardViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun DashboardScreen(
@@ -30,10 +36,12 @@ fun DashboardScreen(
     onNavigateToDetail: (key: String, value: String) -> Unit = { _, _ -> },
     onLogoutSuccess: () -> Unit = {},
     onNavigateToCreateBudget: () -> Unit = {},
-    onNavigateToFinancialReport: () -> Unit = {}
+    onNavigateToFinancialReport: () -> Unit = {},
+    dashboardViewModel: DashboardViewModel = viewModel()
 ) {
     // 0 = Home, 1 = Transaction, 2 = Center '+' (Transfer), 3 = Budget, 4 = Profile
-    var selectedBottomTab by remember { mutableIntStateOf(0) }
+    val selectedBottomTab = dashboardViewModel.selectedBottomTab
+    val uiState by dashboardViewModel.uiState.collectAsState()
 
     // Fonts & Colors
     val manropeRegular = FontFamily(Font(R.font.manrope_regular))
@@ -54,8 +62,8 @@ fun DashboardScreen(
                 purpleBlue = purpleBlue,
                 grayText = grayText,
                 manropeSemiBold = manropeSemiBold,
-                onTabSelected = { index -> selectedBottomTab = index },
-                onFabClick = { selectedBottomTab = 2 }
+                onTabSelected = { index -> dashboardViewModel.selectBottomTab(index) },
+                onFabClick = { dashboardViewModel.selectBottomTab(2) }
             )
         }
     ) { innerPadding ->
@@ -67,6 +75,11 @@ fun DashboardScreen(
             when (selectedBottomTab) {
                 0 -> {
                     HomeTabContent(
+                        uiState = uiState,
+                        selectedMonth = dashboardViewModel.selectedMonth,
+                        selectedFilterTab = dashboardViewModel.selectedFilterTab,
+                        onMonthSelected = { dashboardViewModel.selectMonth(it) },
+                        onFilterTabSelected = { dashboardViewModel.selectFilterTab(it) },
                         manropeRegular = manropeRegular,
                         manropeSemiBold = manropeSemiBold,
                         manropeBold = manropeBold,
@@ -75,7 +88,7 @@ fun DashboardScreen(
                         yellowColor = yellowColor,
                         redColor = redColor,
                         onNotificationClick = onNotificationClick,
-                        onNavigateToProfile= {selectedBottomTab = 4},
+                        onNavigateToProfile = { dashboardViewModel.selectBottomTab(4) },
                         onNavigateToMoney = onNavigateToMoney
                     )
                 }
@@ -113,17 +126,6 @@ fun DashboardScreen(
                         onNavigateToDetail = onNavigateToDetail,
                         onLogoutSuccess = onLogoutSuccess
                     )
-//                    Box(
-//                        modifier = Modifier.fillMaxSize(),
-//                        contentAlignment = Alignment.Center
-//                    ) {
-//                        Text(
-//                            text = "Profile Screen",
-//                            fontFamily = manropeBold,
-//                            fontSize = 18.sp,
-//                            color = grayText
-//                        )
-//                    }
                 }
             }
         }
@@ -132,12 +134,23 @@ fun DashboardScreen(
 
 @Composable
 fun DashboardHistoryRow(
-    item: DashboardHistoryDataItem,
+    item: TransactionRecord,
     manropeBold: FontFamily,
     manropeSemiBold: FontFamily,
     grayText: Color,
     redColor: Color
 ) {
+    val isIncome = item.type.equals("Income", ignoreCase = true)
+    val amountColor = if (isIncome) Color(0xFF00A86B) else redColor
+    val amountPrefix = if (isIncome) "+ ₹" else "- ₹"
+    val formattedTime = remember(item.timestamp) {
+        if (item.timestamp > 0L) {
+            SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(item.timestamp))
+        } else {
+            "Just now"
+        }
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -150,21 +163,13 @@ fun DashboardHistoryRow(
                 vertical = 14.dp
             )
     ) {
-        if (item.image != null) {
-            RenderUrlImage(
-                imageUrl = item.image,
-                contentDescription = "Category Icon",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
-        } else {
-            Image(
-                painter = painterResource(id = R.drawable.ic_img_placeholder),
-                contentDescription = "Placeholder Icon",
-                modifier = Modifier.size(48.dp)
-            )
-        }
+        Image(
+            painter = painterResource(
+                id = if (isIncome) R.drawable.ic_income else R.drawable.expense
+            ),
+            contentDescription = item.category,
+            modifier = Modifier.size(48.dp)
+        )
 
         Column(
             modifier = Modifier
@@ -172,13 +177,13 @@ fun DashboardHistoryRow(
                 .padding(start = dimensionResource(id = R.dimen.dimen_10))
         ) {
             Text(
-                text = "Shopping",
+                text = item.category.ifBlank { item.type },
                 fontFamily = manropeBold,
                 fontSize = 18.sp,
                 color = Color.Black
             )
             Text(
-                text = "Buy some grocery",
+                text = item.description.ifBlank { item.wallet },
                 fontFamily = manropeSemiBold,
                 fontSize = 14.sp,
                 color = grayText
@@ -187,13 +192,13 @@ fun DashboardHistoryRow(
 
         Column(horizontalAlignment = Alignment.End) {
             Text(
-                text = item.price ?: "- ₹100",
+                text = "$amountPrefix${item.numericAmount().toInt()}",
                 fontFamily = manropeBold,
                 fontSize = 18.sp,
-                color = redColor
+                color = amountColor
             )
             Text(
-                text = item.time ?: "10:00 AM",
+                text = formattedTime,
                 fontFamily = manropeSemiBold,
                 fontSize = 14.sp,
                 color = grayText

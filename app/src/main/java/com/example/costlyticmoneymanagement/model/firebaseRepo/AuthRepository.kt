@@ -1,4 +1,4 @@
-package com.example.costlyticmoneymanagement.model
+package com.example.costlyticmoneymanagement.model.firebaseRepo
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException

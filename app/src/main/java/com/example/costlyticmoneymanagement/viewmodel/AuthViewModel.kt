@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.costlyticmoneymanagement.model.AuthRepository
+import com.example.costlyticmoneymanagement.model.firebaseRepo.AuthRepository
 import com.example.costlyticmoneymanagement.model.sealed.AuthResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
