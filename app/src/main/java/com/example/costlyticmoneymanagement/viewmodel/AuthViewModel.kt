@@ -24,7 +24,12 @@ class AuthViewModel(
     var passwordError by mutableStateOf<String?>(null)
         private set
 
+    var nameError by mutableStateOf<String?>(null)
+        private set
+
     var generalError by mutableStateOf<String?>(null)
+        private set
+    var phoneError by mutableStateOf<String?>(null)
         private set
 
     fun clearEmailError() {
@@ -34,6 +39,10 @@ class AuthViewModel(
     fun clearPasswordError() {
         passwordError = null
     }
+
+    fun clearNameError() { nameError = null }
+    fun clearPhoneError() { phoneError = null }
+    fun clearGeneralError() { generalError = null }
 
     private fun isValidEmail(target: String): Boolean {
         return target.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(target).matches()
@@ -91,28 +100,51 @@ class AuthViewModel(
     }
 
     fun signUp(
-        name: String,
+        rawName: String,
         rawEmail: String,
-        phone: String,
+        rawPhone: String,
         password: String,
         onSignUpSuccess: (otp: String) -> Unit
     ) {
+        nameError = null
         emailError = null
+        phoneError = null
         passwordError = null
         generalError = null
 
+        val trimmedName = rawName.trim()
         val trimmedEmail = rawEmail.trim()
-        if (name.trim().isEmpty()) {
-            generalError = "Name is required"
-            return
-        }
-        if (!isValidEmail(trimmedEmail)) {
-            emailError = "Invalid email address"
-            return
-        }
-        if (password.length !in 8..16) {
-            passwordError = "Password must be 8 to 16 characters long"
-            return
+        val trimmedPhone = rawPhone.trim()
+
+        when {
+            trimmedName.isEmpty() -> {
+                nameError = "Name is required"
+                return
+            }
+            trimmedEmail.isEmpty() -> {
+                emailError = "Email is required"
+                return
+            }
+            !isValidEmail(trimmedEmail) -> {
+                emailError = "Invalid email address"
+                return
+            }
+            trimmedPhone.isEmpty() -> {
+                phoneError = "Phone number is required"
+                return
+            }
+            trimmedPhone.length != 10 -> {
+                phoneError = "Phone number must be 10 digits"
+                return
+            }
+            password.isEmpty() -> {
+                passwordError = "Password is required"
+                return
+            }
+            password.length !in 8..16 -> {
+                passwordError = "Password must be at least 8 to 16 characters long"
+                return
+            }
         }
 
         isLoading = true
@@ -124,7 +156,7 @@ class AuthViewModel(
             }
         }
 
-        repository.signUpUser(name.trim(), trimmedEmail, phone.trim(), password) { result ->
+        repository.signUpUser(trimmedName, trimmedEmail, trimmedPhone, password) { result ->
             timeoutJob.cancel()
             isLoading = false
             when (result) {

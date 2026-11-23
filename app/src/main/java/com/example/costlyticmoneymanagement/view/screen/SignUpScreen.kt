@@ -1,8 +1,6 @@
 package com.example.costlyticmoneymanagement.view.screen
 
-import android.text.TextUtils
 import android.util.Log
-import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -42,24 +40,34 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.costlyticmoneymanagement.R
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.costlyticmoneymanagement.viewmodel.AuthViewModel
 
 @Composable
 fun SignUpScreen(
     onBackClick: () -> Unit,
     onLoginClick: () -> Unit,
     onNavigateToVerification: (String) -> Unit,
-    onGoogleSignUpClick: () -> Unit = {}
+    onGoogleSignUpClick: () -> Unit = {},
+    authViewModel: AuthViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val auth = remember { FirebaseAuth.getInstance() }
-    val db = remember { FirebaseFirestore.getInstance() }
-    val databaseReference = remember {
-        FirebaseDatabase.getInstance().getReference("table_User")
-    }
+//    val auth = remember { FirebaseAuth.getInstance() }
+//    val db = remember { FirebaseFirestore.getInstance() }
+//    val databaseReference = remember {
+//        FirebaseDatabase.getInstance().getReference("table_User")
+//    }
+
+    // ViewModel States
+    val isLoading = authViewModel.isLoading
+    val nameError = authViewModel.nameError
+    val emailError = authViewModel.emailError
+    val phoneError = authViewModel.phoneError
+    val passwordError = authViewModel.passwordError
+    val generalError = authViewModel.generalError
+
+
     // Form States
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -67,12 +75,6 @@ fun SignUpScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isTermsChecked by remember { mutableStateOf(false) }
-
-    // Error States
-    var nameError by remember { mutableStateOf<String?>(null) }
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var phoneError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
 
     // Fonts & Colors
     val interMedium = FontFamily(Font(R.font.inter_medium))
@@ -82,58 +84,55 @@ fun SignUpScreen(
     val hintText = colorResource(id = R.color.hint_text)
     val grayText = colorResource(id = R.color.gray_Text)
 
-    fun isValidEmail(target: CharSequence): Boolean {
-        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches()
+// Show general Firebase errors as a Toast
+    LaunchedEffect(generalError) {
+        generalError?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            authViewModel.clearGeneralError()
+        }
     }
+//    fun isValidEmail(target: CharSequence): Boolean {
+//        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches()
+//    }
 
-    fun createUser(emailInput: String, passInput: String, nameInput: String, phoneInput: String) {
-        // Step 1: Create the account in Firebase Auth
-        auth.createUserWithEmailAndPassword(emailInput, passInput)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val userId = auth.currentUser?.uid
-
-                    // Step 2: Create a Map of the extra details
-                    val userProfile = hashMapOf(
-                        "name" to nameInput,
-                        "phone" to phoneInput,
-                        "email" to emailInput
-                    )
-
-                    // Step 3: Save to Firestore using the UID as the Document ID
-                    userId?.let { uid ->
-                        databaseReference.child(userId).setValue(userProfile)
-                        Log.d("Firebase--->", "User profile created for $userProfile")
-                        db.collection("users").document(uid)
-                            .set(userProfile)
-                            .addOnSuccessListener {
-                                Toast.makeText(
-                                    context,
-                                    "Otp Send Successfully",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                val otp = (100000..999999).random().toString()
-                                Log.d("OTP", "Generated OTP: $otp")
-                                Toast.makeText(context, "OTP (UAT): $otp", Toast.LENGTH_LONG).show()
-                                Log.d("TAG", "User profile created for $uid")
-
-                                onNavigateToVerification(otp)
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w("TAG", "Error writing document", e)
-                            }
-                    }
-                } else {
-                    // Handle Auth failure (e.g., password too short, email exists)
-                    Toast.makeText(
-                        context,
-                        "Auth Failed: ${task.exception?.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-    }
+//    fun createUser(emailInput: String, passInput: String, nameInput: String, phoneInput: String) {
+//        // Step 1: Create the account in Firebase Auth
+//        auth.createUserWithEmailAndPassword(emailInput, passInput).addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    val userId = auth.currentUser?.uid
+//
+//                    // Step 2: Create a Map of the extra details
+//                    val userProfile = hashMapOf(
+//                        "name" to nameInput, "phone" to phoneInput, "email" to emailInput
+//                    )
+//
+//                    // Step 3: Save to Firestore using the UID as the Document ID
+//                    userId?.let { uid ->
+//                        databaseReference.child(userId).setValue(userProfile)
+//                        Log.d("Firebase--->", "User profile created for $userProfile")
+//                        db.collection("users").document(uid).set(userProfile).addOnSuccessListener {
+//                                Toast.makeText(
+//                                    context, "Otp Send Successfully", Toast.LENGTH_SHORT
+//                                ).show()
+//
+//                                val otp = (100000..999999).random().toString()
+//                                Log.d("OTP", "Generated OTP: $otp")
+//                                Toast.makeText(context, "OTP (UAT): $otp", Toast.LENGTH_LONG).show()
+//                                Log.d("TAG", "User profile created for $uid")
+//
+//                                onNavigateToVerification(otp)
+//                            }.addOnFailureListener { e ->
+//                                Log.w("TAG", "Error writing document", e)
+//                            }
+//                    }
+//                } else {
+//                    // Handle Auth failure (e.g., password too short, email exists)
+//                    Toast.makeText(
+//                        context, "Auth Failed: ${task.exception?.message}", Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }
+//    }
 
     Column(
         modifier = Modifier
@@ -154,8 +153,7 @@ fun SignUpScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .clickable { onBackClick() }
-            )
+                    .clickable { onBackClick() })
 
             Text(
                 text = "Sign Up",
@@ -174,49 +172,36 @@ fun SignUpScreen(
                 .padding(top = dimensionResource(id = R.dimen.dimen_60))
         ) {
             TextField(
-                value = name,
-                onValueChange = {
+                value = name, onValueChange = {
                     name = it
-                    if (nameError != null) nameError = null
-                },
-                placeholder = {
+                    if (nameError != null) authViewModel.clearNameError()
+                }, placeholder = {
                     Text(
-                        text = "Name",
-                        fontFamily = interMedium,
-                        fontSize = 16.sp,
-                        color = hintText
+                        text = "Name", fontFamily = interMedium, fontSize = 16.sp, color = hintText
                     )
-                },
-                textStyle = TextStyle(
-                    fontFamily = interMedium,
-                    fontSize = 16.sp,
-                    color = blackText
-                ),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    autoCorrectEnabled = true
-                ),
-                colors = TextFieldDefaults.colors(
+                }, textStyle = TextStyle(
+                    fontFamily = interMedium, fontSize = 16.sp, color = blackText
+                ), singleLine = true, keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text, autoCorrectEnabled = true
+                ), colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
-                ),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
+                ), shape = RoundedCornerShape(16.dp), modifier = Modifier
                     .fillMaxWidth()
                     .border(
                         border = BorderStroke(
                             width = 1.dp,
-                            color = if (nameError != null) MaterialTheme.colorScheme.error else Color(0xFFF1F1FA)
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                            color = if (nameError != null) MaterialTheme.colorScheme.error else Color(
+                                0xFFF1F1FA
+                            )
+                        ), shape = RoundedCornerShape(16.dp)
                     )
             )
             if (nameError != null) {
                 Text(
-                    text = nameError!!,
+                    text = nameError,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 8.dp, top = 4.dp)
@@ -235,20 +220,15 @@ fun SignUpScreen(
                 value = email,
                 onValueChange = {
                     email = it
-                    if (emailError != null) emailError = null
+                    if (emailError != null) authViewModel.clearEmailError()
                 },
                 placeholder = {
                     Text(
-                        text = "Email",
-                        fontFamily = interMedium,
-                        fontSize = 16.sp,
-                        color = hintText
+                        text = "Email", fontFamily = interMedium, fontSize = 16.sp, color = hintText
                     )
                 },
                 textStyle = TextStyle(
-                    fontFamily = interMedium,
-                    fontSize = 16.sp,
-                    color = blackText
+                    fontFamily = interMedium, fontSize = 16.sp, color = blackText
                 ),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -264,14 +244,15 @@ fun SignUpScreen(
                     .border(
                         border = BorderStroke(
                             width = 1.dp,
-                            color = if (emailError != null) MaterialTheme.colorScheme.error else Color(0xFFF1F1FA)
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                            color = if (emailError != null) MaterialTheme.colorScheme.error else Color(
+                                0xFFF1F1FA
+                            )
+                        ), shape = RoundedCornerShape(16.dp)
                     )
             )
             if (emailError != null) {
                 Text(
-                    text = emailError!!,
+                    text = emailError,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 8.dp, top = 4.dp)
@@ -291,7 +272,7 @@ fun SignUpScreen(
                 onValueChange = { input ->
                     if (input.length <= 10) {
                         phone = input
-                        if (phoneError != null) phoneError = null
+                        if (phoneError != null) authViewModel.clearPhoneError()
                     }
                 },
                 placeholder = {
@@ -303,9 +284,7 @@ fun SignUpScreen(
                     )
                 },
                 textStyle = TextStyle(
-                    fontFamily = interMedium,
-                    fontSize = 16.sp,
-                    color = blackText
+                    fontFamily = interMedium, fontSize = 16.sp, color = blackText
                 ),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
@@ -321,14 +300,15 @@ fun SignUpScreen(
                     .border(
                         border = BorderStroke(
                             width = 1.dp,
-                            color = if (phoneError != null) MaterialTheme.colorScheme.error else Color(0xFFF1F1FA)
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                            color = if (phoneError != null) MaterialTheme.colorScheme.error else Color(
+                                0xFFF1F1FA
+                            )
+                        ), shape = RoundedCornerShape(16.dp)
                     )
             )
             if (phoneError != null) {
                 Text(
-                    text = phoneError!!,
+                    text = phoneError,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 8.dp, top = 4.dp)
@@ -348,7 +328,7 @@ fun SignUpScreen(
                 onValueChange = {
                     password = it
                     if (password.length in 8..16) {
-                        passwordError = null
+                        authViewModel.clearPasswordError()
                     }
                 },
                 placeholder = {
@@ -360,9 +340,7 @@ fun SignUpScreen(
                     )
                 },
                 textStyle = TextStyle(
-                    fontFamily = interMedium,
-                    fontSize = 16.sp,
-                    color = blackText
+                    fontFamily = interMedium, fontSize = 16.sp, color = blackText
                 ),
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -384,9 +362,7 @@ fun SignUpScreen(
                                 style = Stroke(width = 1.8.dp.toPx())
                             )
                             drawCircle(
-                                color = hintText,
-                                radius = w * 0.14f,
-                                center = center
+                                color = hintText, radius = w * 0.14f, center = center
                             )
                             if (!passwordVisible) {
                                 drawLine(
@@ -412,14 +388,15 @@ fun SignUpScreen(
                     .border(
                         border = BorderStroke(
                             width = 1.dp,
-                            color = if (passwordError != null) MaterialTheme.colorScheme.error else Color(0xFFF1F1FA)
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                            color = if (passwordError != null) MaterialTheme.colorScheme.error else Color(
+                                0xFFF1F1FA
+                            )
+                        ), shape = RoundedCornerShape(16.dp)
                     )
             )
             if (passwordError != null) {
                 Text(
-                    text = passwordError!!,
+                    text = passwordError,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 8.dp, top = 4.dp)
@@ -431,16 +408,14 @@ fun SignUpScreen(
         val termsAnnotatedText = buildAnnotatedString {
             withStyle(
                 style = SpanStyle(
-                    fontFamily = interMedium,
-                    color = blackText
+                    fontFamily = interMedium, color = blackText
                 )
             ) {
                 append("By signing up, you agree to the ")
             }
             withStyle(
                 style = SpanStyle(
-                    fontFamily = interMedium,
-                    color = purpleBlue
+                    fontFamily = interMedium, color = purpleBlue
                 )
             ) {
                 append("Terms of Service \nand Privacy Policy")
@@ -465,8 +440,7 @@ fun SignUpScreen(
                     .clickable {
                         isTermsChecked = !isTermsChecked
                         Log.d("CheckboxClick", "Checkbox was clicked")
-                    }
-            )
+                    })
 
             Text(
                 text = termsAnnotatedText,
@@ -476,27 +450,62 @@ fun SignUpScreen(
         }
 
         // Sign Up Button (Enabled/Disabled & Tint controlled by isTermsChecked)
+//        Button(
+//            onClick = {
+//                if (name.isEmpty()) {
+//                    nameError = "Name is required"
+//                } else if (email.isEmpty()) {
+//                    emailError = "Email is required"
+//                } else if (!isValidEmail(email.trim())) {
+//                    emailError = "InValid email address"
+//                } else if (phone.isEmpty()) {
+//                    phoneError = "Phone number is required"
+//                } else if (phone.length != 10) {
+//                    phoneError = "Phone number must be 10 digits"
+//                } else if (password.isEmpty()) {
+//                    passwordError = "Password is required"
+//                } else if (password.length !in 8..16) {
+//                    passwordError = "Password must be at least 8 to 16 characters long"
+//                } else {
+//                    createUser(email, password, name, phone)
+//                }
+//            },
+//            enabled = isTermsChecked,
+//            colors = ButtonDefaults.buttonColors(
+//                containerColor = purpleBlue,
+//                contentColor = Color.White,
+//                disabledContainerColor = grayText,
+//                disabledContentColor = Color.White
+//            ),
+//            shape = RoundedCornerShape(16.dp),
+//            contentPadding = PaddingValues(vertical = dimensionResource(id = R.dimen.dimen_16)),
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 20.dp)
+//                .padding(top = dimensionResource(id = R.dimen.dimen_27), bottom = 20.dp)
+//        ) {
+//            Text(
+//                text = "Sign Up", fontFamily = interBold, fontSize = 18.sp, color = Color.White
+//            )
+//        }
+
+        // Sign Up Button
         Button(
             onClick = {
-                if (name.isEmpty()) {
-                    nameError = "Name is required"
-                } else if (email.isEmpty()) {
-                    emailError = "Email is required"
-                } else if (!isValidEmail(email.trim())) {
-                    emailError = "InValid email address"
-                } else if (phone.isEmpty()) {
-                    phoneError = "Phone number is required"
-                } else if (phone.length != 10) {
-                    phoneError = "Phone number must be 10 digits"
-                } else if (password.isEmpty()) {
-                    passwordError = "Password is required"
-                } else if (password.length !in 8..16) {
-                    passwordError = "Password must be at least 8 to 16 characters long"
-                } else {
-                    createUser(email, password, name, phone)
-                }
+                authViewModel.signUp(
+                    rawName = name,
+                    rawEmail = email,
+                    rawPhone = phone,
+                    password = password,
+                    onSignUpSuccess = { otp ->
+                        Toast.makeText(context, "Otp Send Successfully", Toast.LENGTH_SHORT).show()
+                        Log.d("OTP", "Generated OTP: $otp")
+                        Toast.makeText(context, "OTP (UAT): $otp", Toast.LENGTH_LONG).show()
+                        onNavigateToVerification(otp)
+                    }
+                )
             },
-            enabled = isTermsChecked,
+            enabled = isTermsChecked && !isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = purpleBlue,
                 contentColor = Color.White,
@@ -510,12 +519,20 @@ fun SignUpScreen(
                 .padding(horizontal = 20.dp)
                 .padding(top = dimensionResource(id = R.dimen.dimen_27), bottom = 20.dp)
         ) {
-            Text(
-                text = "Sign Up",
-                fontFamily = interBold,
-                fontSize = 18.sp,
-                color = Color.White
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 2.5.dp,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Text(
+                    text = "Sign Up",
+                    fontFamily = interBold,
+                    fontSize = 18.sp,
+                    color = Color.White
+                )
+            }
         }
 
         // "or with" Text
@@ -541,8 +558,7 @@ fun SignUpScreen(
                     border = BorderStroke(1.dp, Color(0xFFF1F1FA)),
                     shape = RoundedCornerShape(16.dp)
                 )
-                .clickable { onGoogleSignUpClick() }
-        ) {
+                .clickable { onGoogleSignUpClick() }) {
             Image(
                 painter = painterResource(id = R.drawable.ic_google),
                 contentDescription = "Google Icon",
@@ -579,7 +595,6 @@ fun SignUpScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = dimensionResource(id = R.dimen.dimen_20), bottom = 24.dp)
-                .clickable { onLoginClick() }
-        )
+                .clickable { onLoginClick() })
     }
 }

@@ -1,15 +1,23 @@
 package com.example.costlyticmoneymanagement.model
 
-import com.example.costlyticmoneymanagement.model.sealed.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+
+sealed class AuthResult {
+    data object Success : AuthResult()
+    data class EmailError(val message: String) : AuthResult()
+    data class PasswordError(val message: String) : AuthResult()
+    data class GeneralError(val message: String) : AuthResult()
+}
 
 class AuthRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
+    private val db: FirebaseDatabase = FirebaseDatabase.getInstance(),
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
@@ -51,44 +59,48 @@ class AuthRepository(
         onResult: (AuthResult) -> Unit
     ) {
         auth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener { authResult ->
-                val uid = authResult.user?.uid
-                if (uid == null) {
-                    onResult(AuthResult.GeneralError("Failed to create user ID"))
-                    return@addOnSuccessListener
-                }
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val uid = auth.currentUser?.uid
+                    if (uid == null) {
+                        onResult(AuthResult.GeneralError("Failed to get user ID"))
+                        return@addOnCompleteListener
+                    }
 
-                val userMap = mapOf(
-                    "uid" to uid,
-                    "name" to name,
-                    "email" to email,
-                    "phone" to phone,
-                    "currency" to "₹"
-                )
+                    val userProfile = hashMapOf(
+                        "name" to name,
+                        "phone" to phone,
+                        "email" to email
+                    )
 
-                db.getReference("users").child(uid).setValue(userMap)
-                    .addOnSuccessListener {
-                        onResult(AuthResult.Success)
-                    }
-                    .addOnFailureListener { e ->
-                        onResult(
-                            AuthResult.GeneralError(
-                                e.localizedMessage ?: "Failed to save profile"
+                    // Save to Realtime Database ("table_User")
+                    db.getReference("table_User").child(uid).setValue(userProfile)
+
+                    // Save to Firestore ("users")
+                    firestore.collection("users").document(uid)
+                        .set(userProfile)
+                        .addOnSuccessListener {
+                            onResult(AuthResult.Success)
+                        }
+                        .addOnFailureListener { e ->
+                            onResult(
+                                AuthResult.GeneralError(
+                                    e.localizedMessage ?: "Failed to save profile"
+                                )
                             )
-                        )
-                    }
-            }
-            .addOnFailureListener { exception ->
-                when (exception) {
-                    is FirebaseAuthUserCollisionException -> {
-                        onResult(AuthResult.EmailError("Email is already registered"))
-                    }
-                    else -> {
-                        onResult(
-                            AuthResult.GeneralError(
-                                exception.localizedMessage ?: "Sign up failed"
+                        }
+                } else {
+                    when (val exception = task.exception) {
+                        is FirebaseAuthUserCollisionException -> {
+                            onResult(AuthResult.EmailError("Email is already registered"))
+                        }
+                        else -> {
+                            onResult(
+                                AuthResult.GeneralError(
+                                    exception?.localizedMessage ?: "Sign up failed"
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
