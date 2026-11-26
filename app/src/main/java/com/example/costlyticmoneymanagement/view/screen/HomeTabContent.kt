@@ -156,6 +156,8 @@ fun HomeTabContent(
             ) {
                 CircularImageView(
                     resId = R.drawable.profile,
+                    borderWidth = 1.dp,
+                    borderColor = Color(0xFFEEE5FF),
                     modifier = Modifier
                         .size(42.dp)
                         .clickable {

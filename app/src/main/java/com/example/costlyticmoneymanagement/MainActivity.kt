@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.costlyticmoneymanagement.ui.theme.CostlyticMoneyManagementTheme
 import com.example.costlyticmoneymanagement.view.navigation.Screen
+import com.example.costlyticmoneymanagement.view.screen.AddAccountBalance
 import com.example.costlyticmoneymanagement.view.screen.CreateBudgetScreen
 import com.example.costlyticmoneymanagement.view.screen.DashboardScreen
 import com.example.costlyticmoneymanagement.view.screen.FinancialDetailReportScreen
@@ -236,8 +237,14 @@ class MainActivity : ComponentActivity() {
                             navController.popBackStack()
                         },
                         onNavigateToDetailAccount = {
-                            navController.navigate(Screen.DetailAccount.route)
+                            navController.navigate(Screen.AddAccountBalance.route)
                         },
+                    )
+                }
+
+                composable(Screen.AddAccountBalance.route) {
+                    AddAccountBalance(
+                        onBackClick = { navController.navigate(Screen.AddAccountBalance.route) }
                     )
                 }
 
