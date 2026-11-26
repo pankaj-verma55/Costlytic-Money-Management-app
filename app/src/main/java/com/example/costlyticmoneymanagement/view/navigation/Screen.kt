@@ -23,9 +23,10 @@ sealed class Screen(val route: String) {
         fun createRoute(key: String, value: String) = "detail_transaction/$key/$value"
     }
 
-    object DetailAccount : Screen("detail_account")
+    object AddAccountBalance : Screen("add_account_balance")
 
     object FinancialReport : Screen("financial_report")
 
     object FinancialDetailReport : Screen("financial_detail_report")
+    object Profile : Screen("profile")
 }

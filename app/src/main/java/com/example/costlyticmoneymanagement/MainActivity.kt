@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.costlyticmoneymanagement.ui.theme.CostlyticMoneyManagementTheme
 import com.example.costlyticmoneymanagement.view.navigation.Screen
+import com.example.costlyticmoneymanagement.view.screen.AddAccountBalance
 import com.example.costlyticmoneymanagement.view.screen.CreateBudgetScreen
 import com.example.costlyticmoneymanagement.view.screen.DashboardScreen
 import com.example.costlyticmoneymanagement.view.screen.FinancialDetailReportScreen
@@ -31,7 +32,6 @@ import com.example.costlyticmoneymanagement.view.screen.TransferScreen
 import com.example.costlyticmoneymanagement.view.screen.VerificationScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.pipeline.Expression.Companion.type
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,7 +108,8 @@ class MainActivity : ComponentActivity() {
                     )
                 ) { backStackEntry ->
                     val otp = backStackEntry.arguments?.getString("otp") ?: ""
-                    val currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: "pv84*****@gmail.com"
+                    val currentEmail =
+                        FirebaseAuth.getInstance().currentUser?.email ?: "pv84*****@gmail.com"
 
                     VerificationScreen(
                         otp = otp,
@@ -237,8 +238,21 @@ class MainActivity : ComponentActivity() {
                             navController.popBackStack()
                         },
                         onNavigateToDetailAccount = {
-                            navController.navigate(Screen.DetailAccount.route)
+                            navController.navigate(Screen.AddAccountBalance.route)
                         },
+                    )
+                }
+
+                composable(Screen.AddAccountBalance.route) {
+                    AddAccountBalance(
+                        onBackClick = {
+                            if (navController.previousBackStackEntry != null) {
+                                navController.popBackStack(
+                                    route = Screen.DetailTransaction.route,
+                                    inclusive = false
+                                )
+                            }
+                        }
                     )
                 }
 
@@ -256,7 +270,6 @@ class MainActivity : ComponentActivity() {
                             navController.popBackStack()
                         })
                 }
-
 
 
             }

@@ -2,8 +2,6 @@ package com.example.costlyticmoneymanagement.view.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import android.text.TextUtils
-import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -36,33 +34,31 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.costlyticmoneymanagement.R
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.example.costlyticmoneymanagement.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
     onBackClick: () -> Unit,
     onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit,
-    onForgetPasswordClick: () -> Unit
+    onForgetPasswordClick: () -> Unit,
+    authViewModel: AuthViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     // Form States
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    val auth = FirebaseAuth.getInstance()
 
-    // Error States
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
+    // ViewModel States
+    val isLoading = authViewModel.isLoading
+    val emailError = authViewModel.emailError
+    val passwordError = authViewModel.passwordError
 
     // Fonts & Colors
     val interMedium = FontFamily(Font(R.font.inter_medium))
@@ -71,57 +67,12 @@ fun LoginScreen(
     val blackText = colorResource(id = R.color.black_text)
     val hintText = colorResource(id = R.color.hint_text)
 
-    var isLoading by remember { mutableStateOf(false) }
-
-    fun isValidEmail(target: CharSequence): Boolean {
-        return !TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches()
-    }
-
-    fun loginUser(
-        emailInput: String,
-        passInput: String,
-        onEmailError: (String) -> Unit,
-        onPasswordError: (String) -> Unit
-    ) {
-        isLoading = true
-        val timeoutJob = coroutineScope.launch {
-            kotlinx.coroutines.delay(15_000L)
-            if (isLoading) {
-                isLoading = false
-                onPasswordError("Network timeout. Check your internet connection and try again.")
-            }
-        }
-        auth.signInWithEmailAndPassword(emailInput, passInput).addOnSuccessListener {
-            timeoutJob.cancel()
-            isLoading = false
-                Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
-                onLoginSuccess()
-            }.addOnFailureListener { exception ->
-                timeoutJob.cancel()
-            isLoading = false
-                when (exception) {
-                    is FirebaseAuthInvalidUserException -> {
-                        onEmailError("Email is not registered")
-                    }
-
-                    is FirebaseAuthInvalidCredentialsException -> {
-                        onPasswordError("Incorrect password")
-                    }
-
-                    else -> {
-                        onPasswordError(exception.localizedMessage ?: "Authentication failed")
-                    }
-                }
-            }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
             .systemBarsPadding()
     ) {
-        // Top Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -152,12 +103,16 @@ fun LoginScreen(
                 .padding(top = dimensionResource(id = R.dimen.dimen_72))
         ) {
             TextField(
-                value = email, onValueChange = {
-                email = it
-                if (emailError != null) emailError = null
-            }, placeholder = {
+                value = email,
+                onValueChange = { email = it
+                    if (emailError != null) authViewModel.clearEmailError()
+                                },
+                placeholder = {
                 Text(
-                    text = "Email", fontFamily = interMedium, fontSize = 16.sp, color = hintText
+                    text = "Email",
+                    fontFamily = interMedium,
+                    fontSize = 16.sp,
+                    color = hintText
                 )
             }, textStyle = TextStyle(
                 fontFamily = interMedium, fontSize = 16.sp, color = blackText
@@ -183,7 +138,7 @@ fun LoginScreen(
 
             if (emailError != null) {
                 Text(
-                    text = emailError!!,
+                    text = emailError,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 8.dp, top = 4.dp)
@@ -202,7 +157,7 @@ fun LoginScreen(
                 value = password,
                 onValueChange = {
                     password = it
-                    if (passwordError != null) passwordError = null
+                    if (passwordError != null) authViewModel.clearPasswordError()
                 },
                 placeholder = {
                     Text(
@@ -251,7 +206,7 @@ fun LoginScreen(
 
             if (passwordError != null) {
                 Text(
-                    text = passwordError!!,
+                    text = passwordError,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(start = 8.dp, top = 4.dp)
@@ -263,25 +218,14 @@ fun LoginScreen(
         Button(
             enabled = !isLoading,
             onClick = {
-                emailError = null
-                passwordError = null
-                val trimmedEmail = email.trim()
-
-                if (trimmedEmail.isEmpty()) {
-                    emailError = "Email is required"
-                } else if (!isValidEmail(trimmedEmail.trim())) {
-                    emailError = "InValid email address"
-                } else if (password.isEmpty()) {
-                    passwordError = "Password is required"
-                } else if (password.length !in 8..16) {
-                    passwordError = "Password must be at least 8 to 16 characters long"
-                } else {
-                    loginUser(
-                        emailInput = trimmedEmail,
-                        passInput = password,
-                        onEmailError = { msg -> emailError = msg },
-                        onPasswordError = { msg -> passwordError = msg })
-                }
+                authViewModel.login(
+                    rawEmail = email,
+                    password = password,
+                    onLoginSuccess = {
+                        Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
+                        onLoginSuccess()
+                    }
+                )
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF7F3DFF), contentColor = Color.White
@@ -308,9 +252,6 @@ fun LoginScreen(
                     color = Color.White
                 )
             }
-//            Text(
-//                text = "Login", fontFamily = interBold, fontSize = 18.sp, color = Color.White
-//            )
         }
 
         // Forget Password Text
@@ -345,4 +286,15 @@ fun LoginScreen(
                 .padding(top = dimensionResource(id = R.dimen.dimen_20))
                 .clickable { onSignUpClick() })
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(
+        onBackClick = {},
+        onLoginSuccess = {},
+        onSignUpClick = {},
+        onForgetPasswordClick = {}
+    )
 }

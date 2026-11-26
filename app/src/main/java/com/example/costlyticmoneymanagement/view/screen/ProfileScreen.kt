@@ -1,6 +1,5 @@
 package com.example.costlyticmoneymanagement.view.screen
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -12,7 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,52 +27,37 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.costlyticmoneymanagement.R
 import com.example.costlyticmoneymanagement.view.dialog.LogoutBottomSheet
 import com.example.costlyticmoneymanagement.view.uicomponent.CircularImageView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.FirebaseDatabase
+import com.example.costlyticmoneymanagement.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
     onNavigateToDetail: (key: String, value: String) -> Unit,
     onLogoutSuccess: () -> Unit,
-    onEditProfileClick: () -> Unit = {}
+    onEditProfileClick: () -> Unit = {},
+    profileViewModel: ProfileViewModel = viewModel()
 ) {
+// Collect ViewModel UI State
+    val uiState by profileViewModel.uiState.collectAsState()
+    val userProfile = uiState.userProfile
     // Fonts & Colors
     val manropeRegular = FontFamily(Font(R.font.manrope_regular))
     val manropeMedium = FontFamily(Font(R.font.manrope_medium))
-
-    val auth = FirebaseAuth.getInstance()
-    val database = FirebaseDatabase.getInstance()
-        .getReference("table_User")
-    val user = auth.currentUser?.uid
-    Log.d("Firebase--->", "User ID: $user")
-    var email by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-//    var phone by remember { mutableStateOf("") }
     val lightGray1 = colorResource(id = R.color.light_gray1)
     val grayText = colorResource(id = R.color.gray_Text)
+
+    // Pure UI state for bottom sheet visibility
     var showLogoutSheet by remember { mutableStateOf(false) }
 
-    LaunchedEffect(user) {
-        if(user != null) {
-            database.child(user).get()
-                .addOnSuccessListener {
-                    name = it.child("name").value.toString()
-                    email = it.child("email").value.toString()
-//                phone = it.child("phone").value.toString()
-                }
-                .addOnFailureListener {  }
-        }
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(lightGray1)
     ) {
-        // 1. Profile Header Row (CircularImageView + Username/Name + Edit Button)
+        // 1. Profile Header Row
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -83,6 +67,8 @@ fun ProfileScreen(
         ) {
             CircularImageView(
                 resId = R.drawable.profile,
+                borderWidth = 2.dp,
+                borderColor = Color(0xFFEEE5FF),
                 modifier = Modifier.size(dimensionResource(id = R.dimen.dimen_80))
             )
 
@@ -93,21 +79,21 @@ fun ProfileScreen(
                     .padding(start = dimensionResource(id = R.dimen.dimen_20))
             ) {
                 Text(
-                    text = email,
+                    text = userProfile.email,
                     fontSize = 16.sp,
                     fontFamily = manropeRegular,
                     color = grayText
                 )
 
                 Text(
-                    text = name,
+                    text = userProfile.name,
                     fontFamily = manropeMedium,
                     fontSize = 26.sp,
                     color = Color.Black
                 )
             }
 
-            // Edit Icon Button (Replaces gray_8_bg)
+            // Edit Icon Button
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -135,10 +121,9 @@ fun ProfileScreen(
                 .clip(RoundedCornerShape(24.dp))
                 .background(Color.White)
         ) {
-            // Account Row
             ProfileMenuItem(
                 iconRes = R.drawable.ic_account,
-                iconContainerColor = Color(0xFFEEE5FF), // login_btn_bg
+                iconContainerColor = Color(0xFFEEE5FF),
                 title = "Account",
                 fontFamily = manropeMedium,
                 onClick = { onNavigateToDetail("account", "account") }
@@ -149,10 +134,9 @@ fun ProfileScreen(
                 color = lightGray1
             )
 
-            // Settings Row
             ProfileMenuItem(
                 iconRes = R.drawable.ic_setting,
-                iconContainerColor = Color(0xFFEEE5FF), // login_btn_bg
+                iconContainerColor = Color(0xFFEEE5FF),
                 title = "Settings",
                 fontFamily = manropeMedium,
                 onClick = { onNavigateToDetail("setting", "setting") }
@@ -163,18 +147,12 @@ fun ProfileScreen(
                 color = lightGray1
             )
 
-
-
-
-            // Logout Row
             ProfileMenuItem(
                 iconRes = R.drawable.ic_logout,
-                iconContainerColor = Color(0xFFFFE2E4), // red_16_bg
+                iconContainerColor = Color(0xFFFFE2E4),
                 title = "Logout",
                 fontFamily = manropeMedium,
-                onClick = {
-                    showLogoutSheet = true
-                }
+                onClick = { showLogoutSheet = true }
             )
 
             if (showLogoutSheet) {
@@ -182,8 +160,7 @@ fun ProfileScreen(
                     onDismiss = { showLogoutSheet = false },
                     onConfirmLogout = {
                         showLogoutSheet = false
-                        auth.signOut()
-                        onLogoutSuccess()
+                        profileViewModel.logout(onLogoutSuccess)
                     }
                 )
             }

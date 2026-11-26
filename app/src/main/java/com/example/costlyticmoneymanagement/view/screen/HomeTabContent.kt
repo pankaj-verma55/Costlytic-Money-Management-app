@@ -37,12 +37,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.Costlytic.Utils.Constant
 import com.example.costlyticmoneymanagement.R
-import com.example.costlyticmoneymanagement.model.data.DashboardHistoryDataItem
+import com.example.costlyticmoneymanagement.model.data.DashboardUiState
 import com.example.costlyticmoneymanagement.view.uicomponent.CircularImageView
 import com.example.costlyticmoneymanagement.view.uicomponent.LineChartView
 
 @Composable
 fun HomeTabContent(
+    uiState: DashboardUiState,
+    selectedMonth: String,
+    selectedFilterTab: String,
+    onMonthSelected: (String) -> Unit,
+    onFilterTabSelected: (String) -> Unit,
     manropeRegular: FontFamily,
     manropeSemiBold: FontFamily,
     manropeBold: FontFamily,
@@ -51,46 +56,47 @@ fun HomeTabContent(
     yellowColor: Color,
     redColor: Color,
     onNotificationClick: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToMoney: (typeKey: String, typeValue: String) -> Unit
 ) {
-    val dummyList = remember {
-        listOf(
-            DashboardHistoryDataItem(
-                image = "https://via.placeholder.com/100",
-                price = "₹2500",
-                time = "10:30 AM"
-            ),
-            DashboardHistoryDataItem(
-                image = "https://via.placeholder.com/100",
-                price = "₹2500",
-                time = "10:30 AM"
-            ),
-            DashboardHistoryDataItem(
-                image = "https://via.placeholder.com/100",
-                price = "₹2500",
-                time = "10:30 AM"
-            ),
-            DashboardHistoryDataItem(
-                image = "https://via.placeholder.com/100",
-                price = "₹2500",
-                time = "10:30 AM"
-            ),
-            DashboardHistoryDataItem(
-                image = "https://via.placeholder.com/100",
-                price = "₹1200",
-                time = "Yesterday"
-            ),
-            DashboardHistoryDataItem(
-                image = "https://via.placeholder.com/100",
-                price = "₹5400",
-                time = "12 Feb 2026"
-            )
-        )
-    }
-
-    val dummyChartData = remember {
-        listOf(120f, 250f, 180f, 300f, 900f, 220f, 350f)
-    }
+//    val dummyList = remember {
+//        listOf(
+//            DashboardHistoryDataItem(
+//                image = "https://via.placeholder.com/100",
+//                price = "₹2500",
+//                time = "10:30 AM"
+//            ),
+//            DashboardHistoryDataItem(
+//                image = "https://via.placeholder.com/100",
+//                price = "₹2500",
+//                time = "10:30 AM"
+//            ),
+//            DashboardHistoryDataItem(
+//                image = "https://via.placeholder.com/100",
+//                price = "₹2500",
+//                time = "10:30 AM"
+//            ),
+//            DashboardHistoryDataItem(
+//                image = "https://via.placeholder.com/100",
+//                price = "₹2500",
+//                time = "10:30 AM"
+//            ),
+//            DashboardHistoryDataItem(
+//                image = "https://via.placeholder.com/100",
+//                price = "₹1200",
+//                time = "Yesterday"
+//            ),
+//            DashboardHistoryDataItem(
+//                image = "https://via.placeholder.com/100",
+//                price = "₹5400",
+//                time = "12 Feb 2026"
+//            )
+//        )
+//    }
+//
+//    val dummyChartData = remember {
+//        listOf(120f, 250f, 180f, 300f, 900f, 220f, 350f)
+//    }
 
     val monthOptions = remember {
         listOf(
@@ -98,10 +104,12 @@ fun HomeTabContent(
             "July", "August", "September", "October", "November", "December"
         )
     }
-    var selectedMonth by remember { mutableStateOf("Month") }
+
+    // Pure UI visibility state for month dropdown slider
     var isMonthSliderVisible by remember { mutableStateOf(false) }
     val purpleBlue = colorResource(id = R.color.purple_blue)
 
+    // Chart entrance animation
     var chartVisible by remember { mutableStateOf(false) }
     val chartAlpha by animateFloatAsState(
         targetValue = if (chartVisible) 1f else 0f,
@@ -116,8 +124,6 @@ fun HomeTabContent(
     LaunchedEffect(Unit) {
         chartVisible = true
     }
-
-    var selectedFilterTab by remember { mutableStateOf("Today") }
 
     Column(
         modifier = Modifier
@@ -150,7 +156,13 @@ fun HomeTabContent(
             ) {
                 CircularImageView(
                     resId = R.drawable.profile,
-                    modifier = Modifier.size(42.dp)
+                    borderWidth = 1.dp,
+                    borderColor = Color(0xFFEEE5FF),
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clickable {
+                            onNavigateToProfile()
+                        }
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -195,6 +207,7 @@ fun HomeTabContent(
                 )
             }
 
+            // Expandable Month Selector Slider
             AnimatedVisibility(
                 visible = isMonthSliderVisible,
                 enter = expandVertically() + fadeIn(),
@@ -206,7 +219,8 @@ fun HomeTabContent(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(monthOptions) { month ->
-                        val isSelected = selectedMonth == month || (selectedMonth == "Month" && month == "All")
+                        val isSelected =
+                            selectedMonth == month || (selectedMonth == "Month" && month == "Yearly")
 
                         Box(
                             contentAlignment = Alignment.Center,
@@ -214,9 +228,8 @@ fun HomeTabContent(
                                 .clip(RoundedCornerShape(20.dp))
                                 .background(if (isSelected) purpleBlue else Color(0xFFEEE5FF))
                                 .clickable {
-                                    selectedMonth = month
+                                    onMonthSelected(month)
                                     isMonthSliderVisible = false
-                                    // Filter dashboard transactions / chart data by `month` here
                                 }
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                         ) {
@@ -231,7 +244,7 @@ fun HomeTabContent(
                 }
             }
 
-            // Account Balance Label & Amount
+            // Account Balance Label & Live Amount from ViewModel
             Text(
                 text = "Account Balance",
                 fontSize = 16.sp,
@@ -243,7 +256,7 @@ fun HomeTabContent(
             )
 
             Text(
-                text = "₹ 400",
+                text = "₹ ${uiState.accountBalance.toInt()}",
                 fontSize = 42.sp,
                 fontFamily = manropeExtraBold,
                 color = Color.Black,
@@ -300,7 +313,7 @@ fun HomeTabContent(
                             color = Color.White
                         )
                         Text(
-                            text = "₹ 5000",
+                            text = "₹ ${uiState.totalIncome.toInt()}",
                             fontFamily = manropeBold,
                             fontSize = 22.sp,
                             maxLines = 1,
@@ -351,7 +364,7 @@ fun HomeTabContent(
                             color = Color.White
                         )
                         Text(
-                            text = "₹ 5000",
+                            text = "₹ ${uiState.totalExpense.toInt()}",
                             fontFamily = manropeBold,
                             fontSize = 22.sp,
                             maxLines = 1,
@@ -374,9 +387,9 @@ fun HomeTabContent(
                 .padding(top = 14.dp)
         )
 
-        // Animated Line Chart
+        // Animated Line Chart (Live from ViewModel)
         LineChartView(
-            data = dummyChartData,
+            data = uiState.chartData,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
@@ -412,7 +425,7 @@ fun HomeTabContent(
                             .weight(1f)
                             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.dimen_16)))
                             .background(if (isSelected) Color(0xFFFCEED4) else Color.Transparent)
-                            .clickable { selectedFilterTab = tab }
+                            .clickable { onFilterTabSelected(tab) }
                             .padding(
                                 vertical = dimensionResource(id = R.dimen.dimen_8)
                             )
@@ -430,21 +443,34 @@ fun HomeTabContent(
             }
         }
 
-        // Transaction History List
+        // Live Transaction History List
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = dimensionResource(id = R.dimen.dimen_16))
                 .padding(top = 10.dp, bottom = 16.dp)
         ) {
-            dummyList.forEach { item ->
-                DashboardHistoryRow(
-                    item = item,
-                    manropeBold = manropeBold,
-                    manropeSemiBold = manropeSemiBold,
-                    grayText = grayText,
-                    redColor = redColor
+            if (uiState.recentTransactions.isEmpty() && !uiState.isLoading) {
+                Text(
+                    text = "No transactions found for this period",
+                    fontFamily = manropeSemiBold,
+                    fontSize = 14.sp,
+                    color = grayText,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp)
                 )
+            } else {
+                uiState.recentTransactions.forEach { item ->
+                    DashboardHistoryRow(
+                        item = item,
+                        manropeBold = manropeBold,
+                        manropeSemiBold = manropeSemiBold,
+                        grayText = grayText,
+                        redColor = redColor
+                    )
+                }
             }
         }
     }
