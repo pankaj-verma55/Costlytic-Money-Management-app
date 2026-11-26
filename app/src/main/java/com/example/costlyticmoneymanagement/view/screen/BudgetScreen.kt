@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,24 +26,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.costlyticmoneymanagement.R
 import com.example.costlyticmoneymanagement.model.data.BudgetItem
-
+import com.example.costlyticmoneymanagement.model.data.BudgetRecord
+import com.example.costlyticmoneymanagement.viewmodel.BudgetViewModel
 
 @Composable
 fun BudgetScreen(
-    budgets: List<BudgetItem> = emptyList(),
     onNavigateToCreateBudget: () -> Unit,
-    onBackClick: (() -> Unit)? = null
+    onBackClick: (() -> Unit)? = null,
+    budgetViewModel: BudgetViewModel = viewModel()
 ) {
-    val months = remember {
-        listOf(
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        )
-    }
-    // Defaults to "May" (index 4) as in fragment_budget.xml
-    var monthIndex by remember { mutableIntStateOf(4) }
+    val uiState by budgetViewModel.uiState.collectAsState()
+    val currentMonth = budgetViewModel.currentMonthName
 
     // Fonts & Colors
     val interMedium = FontFamily(Font(R.font.inter_medium))
@@ -60,7 +57,7 @@ fun BudgetScreen(
             .fillMaxSize()
             .background(purpleBlue)
     ) {
-        // 1. Top Title Bar (Optional back button if opened outside bottom nav)
+        // 1. Top Title Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -87,7 +84,7 @@ fun BudgetScreen(
             )
         }
 
-        // 2. Month Switcher Row (left_arrow_btn, "May", right_arrow_btn)
+        // 2. Month Switcher Row
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -98,9 +95,7 @@ fun BudgetScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable {
-                        monthIndex = if (monthIndex > 0) monthIndex - 1 else months.lastIndex
-                    }
+                    .clickable { budgetViewModel.previousMonth() }
                     .padding(horizontal = dimensionResource(id = R.dimen.dimen_10))
             ) {
                 Image(
@@ -110,7 +105,7 @@ fun BudgetScreen(
             }
 
             Text(
-                text = months[monthIndex],
+                text = currentMonth,
                 fontFamily = manropeMedium,
                 fontSize = 24.sp,
                 color = Color(0xFFFCFCFC),
@@ -124,9 +119,7 @@ fun BudgetScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .weight(1f)
-                    .clickable {
-                        monthIndex = (monthIndex + 1) % months.size
-                    }
+                    .clickable { budgetViewModel.nextMonth() }
                     .padding(horizontal = dimensionResource(id = R.dimen.dimen_10))
             ) {
                 Image(
@@ -136,7 +129,7 @@ fun BudgetScreen(
             }
         }
 
-        // 3. Bottom Rounded Container (Replaces curvedLayout with light_white tint)
+        // 3. Bottom Rounded Container
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -145,43 +138,56 @@ fun BudgetScreen(
                 .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
                 .background(lightWhite)
         ) {
-            if (budgets.isEmpty()) {
-                // Empty Budget Description State (Replaces descriptionText)
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    Text(
-                        text = "You don’t have a budget. Let’s make one so you in control.",
-                        fontFamily = interMedium,
-                        fontSize = 16.sp,
-                        color = grayText,
-                        textAlign = TextAlign.Center,
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = dimensionResource(id = R.dimen.dimen_40))
-                    )
+                            .weight(1f)
+                    ) {
+                        CircularProgressIndicator(color = purpleBlue)
+                    }
                 }
-            } else {
-                // Budget List (Replaces rvList + budget_detail_list_layout.xml)
-                LazyColumn(
-                    contentPadding = PaddingValues(top = 30.dp, bottom = 20.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(horizontal = dimensionResource(id = R.dimen.dimen_16))
-                ) {
-                    items(budgets) { item ->
-                        BudgetDetailCard(
-                            item = item,
-                            manropeRegular = manropeRegular,
-                            manropeMedium = manropeMedium,
-                            manropeBold = manropeBold,
-                            grayText = grayText,
-                            redColor = redColor
+
+                uiState.budgets.isEmpty() -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        Text(
+                            text = "You don’t have a budget. Let’s make one so you in control.",
+                            fontFamily = interMedium,
+                            fontSize = 16.sp,
+                            color = grayText,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = dimensionResource(id = R.dimen.dimen_40))
                         )
+                    }
+                }
+
+                else -> {
+                    LazyColumn(
+                        contentPadding = PaddingValues(top = 30.dp, bottom = 20.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(horizontal = dimensionResource(id = R.dimen.dimen_16))
+                    ) {
+                        items(uiState.budgets) { item ->
+                            BudgetDetailCard(
+                                item = item as BudgetItem,
+                                manropeRegular = manropeRegular,
+                                manropeMedium = manropeMedium,
+                                manropeBold = manropeBold,
+                                grayText = grayText,
+                                redColor = redColor
+                            )
+                        }
                     }
                 }
             }
