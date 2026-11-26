@@ -108,7 +108,8 @@ class MainActivity : ComponentActivity() {
                     )
                 ) { backStackEntry ->
                     val otp = backStackEntry.arguments?.getString("otp") ?: ""
-                    val currentEmail = FirebaseAuth.getInstance().currentUser?.email ?: "pv84*****@gmail.com"
+                    val currentEmail =
+                        FirebaseAuth.getInstance().currentUser?.email ?: "pv84*****@gmail.com"
 
                     VerificationScreen(
                         otp = otp,
@@ -244,7 +245,14 @@ class MainActivity : ComponentActivity() {
 
                 composable(Screen.AddAccountBalance.route) {
                     AddAccountBalance(
-                        onBackClick = { navController.navigate(Screen.AddAccountBalance.route) }
+                        onBackClick = {
+                            if (navController.previousBackStackEntry != null) {
+                                navController.popBackStack(
+                                    route = Screen.DetailTransaction.route,
+                                    inclusive = false
+                                )
+                            }
+                        }
                     )
                 }
 
@@ -262,7 +270,6 @@ class MainActivity : ComponentActivity() {
                             navController.popBackStack()
                         })
                 }
-
 
 
             }

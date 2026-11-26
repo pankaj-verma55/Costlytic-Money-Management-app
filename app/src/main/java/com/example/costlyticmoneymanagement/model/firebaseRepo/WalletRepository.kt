@@ -35,7 +35,7 @@ class WalletRepository(
             }
 
             override fun onCancelled(error: DatabaseError) {
-//                Log()
+                Log.d("WalletStatus","onCancelled: observeWallet Repo  -> $error")
                 trySend(emptyList())
             }
         }
@@ -61,6 +61,7 @@ class WalletRepository(
             }
 
             override fun onCancelled(error: DatabaseError) {
+                Log.d("WalletStatus","onCancelled: observeBank Repo  -> $error")
                 trySend(defaultBanks)
             }
         }
@@ -76,7 +77,7 @@ class WalletRepository(
         val uid = auth.currentUser?.uid
             ?: return onResult(Result.failure(Exception("User not logged in")))
 
-        val userWalletsRef = db.getReference("wallets").child(uid)
+        val userWalletsRef = db.getReference("wallets_table").child(uid)
 
         userWalletsRef.get()
             .addOnSuccessListener { snapshot ->
@@ -93,6 +94,7 @@ class WalletRepository(
                     .addOnFailureListener { e -> onResult(Result.failure(e)) }
             }
             .addOnFailureListener { e ->
+                Log.d("WalletStatus","onCancelled: Add Wallet Repo  -> $e")
                 onResult(Result.failure(e))
             }
     }

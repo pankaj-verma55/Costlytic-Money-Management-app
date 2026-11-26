@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,7 +73,7 @@ fun AccountInfoContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFCFCFC))
+            .background(Color.White)
             .systemBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -130,7 +131,7 @@ fun AccountInfoContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .padding(horizontal = 16.dp, vertical = 30.dp)
+                .padding(horizontal = 8.dp, vertical = 15.dp)
                 .clip(RoundedCornerShape(24.dp))
                 .background(Color.White)
         ) {
@@ -143,6 +144,14 @@ fun AccountInfoContent(
                     textAlign = TextAlign.Center
                 )
             } else {
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color.White,
+                    shadowElevation = 2.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 15.dp)
+                ) {
                 LazyColumn(
                     contentPadding = PaddingValues(vertical = 8.dp),
                     modifier = Modifier.fillMaxSize()
@@ -162,6 +171,7 @@ fun AccountInfoContent(
                         }
                     }
                 }
+            }
             }
         }
 
