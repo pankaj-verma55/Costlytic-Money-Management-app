@@ -77,8 +77,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth:22.3.1")
 
-    implementation ("com.github.bumptech.glide:glide:5.0.0-rc01")
-    annotationProcessor ("com.github.bumptech.glide:compiler:5.0.0-rc01")
+    implementation("com.github.bumptech.glide:glide:5.0.0-rc01")
+    annotationProcessor("com.github.bumptech.glide:compiler:5.0.0-rc01")
 
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
     implementation("io.reactivex.rxjava3:rxjava:3.1.8")
@@ -92,4 +92,14 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.1")
+
+    // Import the BoM (already in your project based on context)
+//    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+
+    // Add the dependency for the App Check library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+
+    // Optional: Add debug provider for testing on emulators
+    implementation("com.google.firebase:firebase-appcheck-debug")
 }

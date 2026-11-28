@@ -30,13 +30,33 @@ import com.example.costlyticmoneymanagement.view.screen.ProfileDetailItemScreen
 import com.example.costlyticmoneymanagement.view.screen.SignUpScreen
 import com.example.costlyticmoneymanagement.view.screen.TransferScreen
 import com.example.costlyticmoneymanagement.view.screen.VerificationScreen
+import com.google.firebase.BuildConfig
+import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.appCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
+        // Initialize App Check
+        val firebaseAppCheck = Firebase.appCheck
+
+        // Use Play Integrity in production
+        // For local testing on emulators, use DebugAppCheckProviderFactory
+        if (BuildConfig.DEBUG) {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+            )
+        } else {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                PlayIntegrityAppCheckProviderFactory.getInstance()
+            )
+        }
+
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
